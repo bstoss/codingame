@@ -1,0 +1,498 @@
+import Foundation
+
+/* Missing func
+ Get higher Rank samples
+- get Molecules for a higher rank if its missing and available. Put between decission for send to cloud
+If rank > 1, than only get needed molecules
+ */
+
+
+/*
+ 1. Molecules
+ Rang gleich 1
+ Ja ->
+    L: Von jedem zwei Molecules mit expertise und ?
+    Nein -> Sind benötige Molecules vorhanden?
+        Nein -> Beginne Sample Loop
+        Ja -> Nehme vorhanden Molecule -> Loop
+    Ja -> Kann ein vorhandes Sample Entwickelt werden?
+        Nein -> Beginne Sample Loop
+        Ja -> Zum Labor
+ Nein -> Kann ein vorhandenes Sample entwickelt werden?
+    Ja -> zum Labor
+    Nein -> kann ein Sample samt vorhandenen Moleculen entwickelt werden?
+        Ja -> Sammle Molucule
+        Nein -> Sample Loop
+ */
+
+/*
+ 2. Sample Loop
+ L: Sind drei Samples in der Hand?
+ Nein -> Gibt es Samples in der Cloud, welche ich entwickeln kann?
+ Ja -> Nehm das Sample und Gehe ins Labor
+ Nein -> Hole fehlende Samples mit Rang -> Loop
+ Ja -> Diagnose Logic
+ */
+
+/*
+ 3. Entwickle Sample
+ L: Gibt es unentwickelte Samples?
+ Ja -> Entwickle diese -> Loop
+ Nein -> Prüfung ob ins Labor
+ */
+
+/*
+ 4. Prüfung ob ins Labor
+ L: Kann Sample Entwickelt werden?
+ Nein -> Schicke es in die Cloud -> Loop
+ Ja -> Zum Labor
+ */
+
+/*
+ 5. Zum Labor
+ Kann ein Sample Entwickelt werden?
+ Ja -> Entickle Sample -> Loop
+ Nein -> Sammle Molecules
+ */
+
+
+//import Glibc
+import Foundation
+
+public struct StderrOutputStream: TextOutputStream {
+    public mutating func write(_ string: String) { fputs(string, stderr) }
+}
+public var errStream = StderrOutputStream()
+
+/**
+ * Bring data on patient samples from the diagnosis machine to the laboratory with enough molecules to produce medicine!
+ **/
+
+
+// Mark: Classes and stuff
+
+enum Mode {
+    case DEBUG
+    case GAME
+}
+
+let mode = Mode.DEBUG
+
+enum Position: String {
+    case START_POS
+    case SAMPLES
+    case DIAGNOSIS
+    case MOLECULES
+    case LABORATORY
+}
+
+struct MoleculesStack {
+    let a: Int
+    let b: Int
+    let c: Int
+    let d: Int
+    let e: Int
+
+    init() {
+        a = 0
+        b = 0
+        c = 0
+        d = 0
+        e = 0
+    }
+
+    init(_ inputs: [String]) {
+        a = Int(inputs[0])!
+        b = Int(inputs[1])!
+        c = Int(inputs[2])!
+        d = Int(inputs[3])!
+        e = Int(inputs[4])!
+    }
+
+    init(a: Int, b: Int, c: Int, d: Int, e: Int) {
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+        self.e = e
+    }
+
+    func num(of type: String) -> Int {
+        switch type {
+        case "A":
+            return a
+        case "B":
+            return b
+        case "C":
+            return c
+        case "D":
+            return d
+        case "E":
+            return e
+        default:
+            return 0
+        }
+    }
+
+    func sum() -> Int {
+        return a + b + c + d + e
+    }
+
+    func contains(_ stack: MoleculesStack) -> Bool {
+        return a >= stack.a && b >= stack.b && c >= stack.c && d >= stack.d && e >= stack.e
+    }
+}
+
+struct Robot {
+    let target: Position
+    let eta: Int
+    let score: Int
+    let stored: MoleculesStack
+    let expertise: MoleculesStack
+
+    var rang: Int {
+        get {
+            let expertiseSum = expertise.sum()
+            if expertiseSum < 7 {
+                return 1
+            }
+            if expertiseSum < 15 {
+                return 2
+            }
+            return 3
+        }
+    }
+
+    // this is only because iam lazy
+    init() {
+        target = .START_POS
+        eta = 0
+        score = 0
+        stored = MoleculesStack()
+        expertise = MoleculesStack()
+    }
+
+    init(_ inputs: [String]) {
+        target = Position(rawValue: inputs[0])! // position to module
+        eta = Int(inputs[1])! // ignore
+        score = Int(inputs[2])! // player score ... not needed?
+        stored = MoleculesStack(a: Int(inputs[3])!, b: Int(inputs[4])!, c: Int(inputs[5])!, d: Int(inputs[6])!, e: Int(inputs[7])!)
+        expertise = MoleculesStack(a: Int(inputs[8])!, b: Int(inputs[9])!, c: Int(inputs[10])!, d: Int(inputs[11])!, e: Int(inputs[12])!)
+    }
+
+    func carryingModules() -> Int {
+        return stored.sum()
+    }
+
+    func missingMolecules() -> [String] {
+        var missing: [String] = []
+
+        if stored.a < 2 {
+            missing.append("A")
+        }
+        if stored.b < 2 {
+            missing.append("B")
+        }
+        if stored.c < 2 {
+            missing.append("C")
+        }
+        if stored.d < 2 {
+            missing.append("D")
+        }
+        if stored.e < 2 {
+            missing.append("E")
+        }
+        return missing
+    }
+
+    func produceableAmountOfMolecules() -> MoleculesStack {
+        let a = stored.a + expertise.a
+        let b = stored.b + expertise.b
+        let c = stored.c + expertise.c
+        let d = stored.d + expertise.d
+        let e = stored.e + expertise.e
+        return MoleculesStack(a: a, b: b, c: c, d: d, e: e)
+    }
+}
+
+struct SampleData {
+
+    let sampleId: Int
+    let carriedBy: Int
+    let rank: Int
+    let expertiseGain: String
+    let health: Int
+    let costs: MoleculesStack
+
+    init(_ inputs: [String]) {
+        sampleId = Int(inputs[0])! // unique id for sample
+        carriedBy = Int(inputs[1])! // 0 = me, 1 = other, -1 = cloud ... only one can cerry a sample
+        rank = Int(inputs[2])! // 1, 2, 3
+        expertiseGain = inputs[3] // ignore
+        health = Int(inputs[4])! // points to gain
+        costs = MoleculesStack(a: Int(inputs[5])!, b: Int(inputs[6])!, c: Int(inputs[7])!, d: Int(inputs[8])!, e: Int(inputs[9])!)
+    }
+
+    func amountOfMolecules() -> Int {
+        return costs.sum()
+    }
+
+    func isAnalyzed() -> Bool {
+        return health > -1
+    }
+}
+
+// MARK: Helper funcs
+
+if mode == .DEBUG {
+    func readLine() -> String {
+        return ""
+    }
+}
+
+func projectCountValue() -> Int {
+    if mode == .DEBUG {
+        return 3
+    }
+    return Int(readLine()!)!
+}
+
+func projectInputes(for index: Int) -> [String] {
+    if mode == .DEBUG {
+        let inputes =  [["0", "0", "0", "4", "4"],["4", "4", "0", "0", "0"],["0", "0", "3", "3", "3"]]
+        return inputes[index]
+    }
+
+    return (readLine()!).characters.split{$0 == " "}.map(String.init)
+}
+
+func playerData(for index: Int) -> Robot {
+    if mode == .DEBUG {
+        // here i can define round
+        let data = [["START_POS", "2", "2", "2", "2", "2", "0", "0", "0", "0", "0", "0", "0"],
+                    ["START_POS", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]]
+        return Robot(data[index])
+    }
+
+    let data = (readLine()!).characters.split{$0 == " "}.map(String.init)
+    return Robot(data)
+}
+
+func availableMoleculesData() -> MoleculesStack {
+
+    if mode == .DEBUG {
+        let data = ["5", "5", "5", "5", "5"]
+        return MoleculesStack(data)
+    }
+
+    return MoleculesStack( (readLine()!).characters.split{$0 == " "}.map(String.init))
+}
+
+func sampleDatasCount() -> Int {
+    if mode == .DEBUG {
+        return 1
+    }
+    return Int(readLine()!)!
+}
+
+func sampleDatas(for index: Int) -> SampleData {
+    if mode == .DEBUG {
+        let inputs = [["0", "0", "1", "0", "-1", "-1", "-1", "-1", "-1", "-1"]]
+        return SampleData(inputs[index])
+    }
+
+    return SampleData((readLine()!).characters.split{$0 == " "}.map(String.init))
+}
+
+let projectCount = projectCountValue()
+var projects: [MoleculesStack] = []
+if projectCount > 0 {
+    for i in 0...(projectCount-1) {
+        let inputs = projectInputes(for: i)
+        let reachableExpertise = MoleculesStack(inputs)
+        projects.append(reachableExpertise)
+    }
+}
+
+var player = Robot()
+var availableMolecules = MoleculesStack()
+var sampleDatas: [SampleData] = []
+/*
+ 1. Molecules
+ Rang gleich 1
+ Ja ->
+ L: Von jedem zwei Molecules mit expertise und ?
+ Nein -> Sind benötige Molecules vorhanden?
+ Nein -> Beginne Sample Loop
+ Ja -> Nehme vorhanden Molecule -> Loop
+ Ja -> Kann ein vorhandes Sample Entwickelt werden?
+ Nein -> Beginne Sample Loop
+ Ja -> Zum Labor
+ Nein -> Kann ein vorhandenes Sample entwickelt werden?
+ Ja -> zum Labor
+ Nein -> kann ein Sample samt vorhandenen Moleculen entwickelt werden?
+ Ja -> Sammle Molucule
+ Nein -> Sample Loop
+ */
+func moleculesLogic() -> String {
+    let missingMolecules = player.missingMolecules()
+    // only get molecules needed for the next sample
+    if missingMolecules.count > 0 {
+        for type in missingMolecules {
+            if availableMolecules.num(of: type) > 0 {
+                // there Modules to get
+                if player.target != Position.MOLECULES {
+                    return "GOTO \(Position.MOLECULES)"
+                }
+                return "CONNECT \(type)"
+            }
+        }
+    }
+
+    let carryingSamples = sampleDatas.filter({$0.carriedBy == 0})
+    let analyzedSamples = sampleDatas.filter({$0.carriedBy == 0 && $0.isAnalyzed()})
+    if player.target == .DIAGNOSIS && analyzedSamples.count < carryingSamples.count {
+        return daignoseLogic()
+    }
+    // Proof ob ins Labor
+    return laboratoryReadyLogic()
+}
+
+/*
+ 2. Sample Loop
+ L: Sind drei Samples in der Hand?
+ Nein -> Gibt es Samples in der Cloud, welche ich entwickeln kann?
+ Ja -> Nehm das Sample und Gehe ins Labor
+ Nein -> Hole fehlende Samples mit RANK 1 -> Loop
+ Ja -> Diagnose Logic
+ */
+
+func sampleLogic() -> String {
+    let carryingSamples = sampleDatas.filter({$0.carriedBy == 0})
+    let cloudSamples = sampleDatas.filter({$0.carriedBy == 0})
+
+    if carryingSamples.count < 3 {
+        if cloudSamples.count > 0 {
+            // Logic if can handle ... when laboratory is ready
+            // return ""
+        }
+        if player.target != .SAMPLES {
+            return "GOTO \(Position.SAMPLES)"
+        }
+        return "CONNECT \(player.rang)" // rank 1 modules only for now
+    }
+
+    return daignoseLogic()
+}
+
+/*
+ 3. Entwickle Sample
+ L: Gibt es unentwickelte Samples?
+ Ja -> Entwickle diese -> Loop
+ Nein -> Prüfung ob ins Labor
+ */
+func daignoseLogic() -> String {
+    let carryingSamples = sampleDatas.filter({$0.carriedBy == 0})
+    if let undiagnosedSample = carryingSamples.lazy.filter({ !$0.isAnalyzed() }).first {
+        if player.target != Position.DIAGNOSIS {
+            return "GOTO \(Position.DIAGNOSIS)"
+        }
+        return "CONNECT \(undiagnosedSample.sampleId)"
+    }
+    return laboratoryReadyLogic()
+}
+
+/*
+ 4. Prüfung ob ins Labor
+ L: Kann Sample Entwickelt werden?
+ Nein -> Schicke es in die Cloud -> Loop
+ Ja -> Zum Labor
+ */
+func laboratoryReadyLogic() -> String {
+    let samples = sampleDatas.filter({$0.carriedBy == 0 && $0.isAnalyzed() })
+    if samples.isEmpty {
+        return sampleLogic()
+    }
+
+    let produceableAmountOfMolecules = player.produceableAmountOfMolecules()
+    for sample in samples {
+        if produceableAmountOfMolecules.contains(sample.costs) {
+            return laboratoryLogic(with: sample)
+        }
+    }
+
+    // send to cloud
+    if player.target != .DIAGNOSIS {
+        return "GOTO \(Position.DIAGNOSIS)"
+    }
+    let sample = samples.first!
+    return "CONNECT \(sample.sampleId)"
+}
+
+/*
+ 5. Zum Labor
+ Kann ein Sample Entwickelt werden?
+ Ja -> Entickle Sample -> Loop
+ Nein -> Sammle Molecules
+ */
+func laboratoryLogic(with sample: SampleData) -> String {
+    if player.target != .LABORATORY {
+        return "GOTO \(Position.LABORATORY)"
+    }
+
+    return "CONNECT \(sample.sampleId)"
+}
+
+// game loop
+while mode == .GAME {
+    // PLAYER DATA
+    var robots: [Robot] = []
+    for i in 0...1 {
+        let robot = playerData(for: i)
+        robots.append(robot)
+    }
+    player = robots[0]
+    availableMolecules = availableMoleculesData()
+
+    // SAMPLE DATA
+    let sampleCount = sampleDatasCount()
+    sampleDatas = []
+    if sampleCount > 0 {
+        for i in 0...(sampleCount-1) {
+            let sampleData = sampleDatas(for: i)
+            sampleDatas.append(sampleData)
+        }
+    }
+
+    if player.eta > 0 {
+        print("ETA: \(player.eta)")
+        continue;
+    }
+
+
+    var printableMessage = ""
+    // 1. Molecules
+    // 2. Sample Data
+    // 3. Analyze
+    // 4: Proof readynes
+    // 5. Laboratory
+
+    if player.target == .MOLECULES || player.target == .LABORATORY {
+        if let sampleData = sampleDatas.filter({$0.carriedBy == 0 && $0.isAnalyzed()}).first, player.produceableAmountOfMolecules().contains(sampleData.costs) {
+            printableMessage = laboratoryLogic(with: sampleData)
+            if printableMessage.count > 0 {
+                print(printableMessage)
+                continue;
+            }
+        }
+    }
+
+    printableMessage = moleculesLogic()
+    if printableMessage.count > 0 {
+        print(printableMessage)
+        continue;
+    }
+}
+
+
+

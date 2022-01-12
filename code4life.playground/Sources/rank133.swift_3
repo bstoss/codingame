@@ -1,0 +1,729 @@
+//import Glibc
+import Foundation
+
+public struct StderrOutputStream: TextOutputStream {
+    public mutating func write(_ string: String) { fputs(string, stderr) }
+}
+public var errStream = StderrOutputStream()
+
+/**
+ * Bring data on patient samples from the diagnosis machine to the laboratory with enough molecules to produce medicine!
+ **/
+
+
+func debug(_ message: String) {
+    // print(message, to: &errStream)
+}
+
+// Mark: Classes and stuff
+
+enum Mode {
+    case DEBUG
+    case GAME
+}
+
+let mode = Mode.DEBUG
+
+enum State {
+    case COLLECT_SAMPLES
+    case SEND_SAMPLES_TO_CLOUD
+    case ANALYZE_SAMPLES
+    case GATHER_MOLECULES
+    case LABORATHORY
+    case GATHER_CLOUD_SAMPLE
+}
+
+enum Position: String {
+    case START_POS
+    case SAMPLES
+    case DIAGNOSIS
+    case MOLECULES
+    case LABORATORY
+}
+
+struct MoleculesStack {
+    var a: Int
+    var b: Int
+    var c: Int
+    var d: Int
+    var e: Int
+
+    init() {
+        a = 0
+        b = 0
+        c = 0
+        d = 0
+        e = 0
+    }
+
+    init(_ inputs: [String]) {
+        a = Int(inputs[0])!
+        b = Int(inputs[1])!
+        c = Int(inputs[2])!
+        d = Int(inputs[3])!
+        e = Int(inputs[4])!
+    }
+
+    init(a: Int, b: Int, c: Int, d: Int, e: Int) {
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+        self.e = e
+    }
+
+    func num(of type: String) -> Int {
+        switch type {
+        case "A":
+            return a
+        case "B":
+            return b
+        case "C":
+            return c
+        case "D":
+            return d
+        case "E":
+            return e
+        default:
+            return 0
+        }
+    }
+
+    func sum() -> Int {
+        return a + b + c + d + e
+    }
+
+    func contains(_ stack: MoleculesStack) -> Bool {
+        return a >= stack.a && b >= stack.b && c >= stack.c && d >= stack.d && e >= stack.e
+    }
+
+    func merged(with stack: MoleculesStack) -> MoleculesStack {
+        let newA = a + stack.a
+        let newB = b + stack.b
+        let newC = c + stack.c
+        let newD = d + stack.d
+        let newE = e + stack.e
+        return MoleculesStack(a: newA, b: newB, c: newC, d: newD, e: newE)
+    }
+
+    mutating func substract(from stack: MoleculesStack) {
+        a = max(0, a - stack.a)
+        b = max(0, b - stack.b)
+        c = max(0, c - stack.c)
+        d = max(0, d - stack.d)
+        e = max(0, e - stack.e)
+    }
+
+    mutating func addMolecule(for type: String) {
+        switch type {
+        case "A":
+            a += 1
+        case "B":
+            b += 1
+        case "C":
+            c += 1
+        case "D":
+            d += 1
+        case "E":
+            e += 1
+        default:
+            return
+        }
+    }
+}
+
+struct Robot {
+    let target: Position
+    let eta: Int
+    let score: Int
+    let stored: MoleculesStack
+    let expertise: MoleculesStack
+
+    var rank: Int {
+        get {
+            let expertiseSum = expertise.sum()
+            if expertiseSum < 6 {
+                return 1
+            }
+            if expertiseSum < 10 {
+                return 2
+            }
+            return 3
+        }
+    }
+
+    // this is only because iam lazy
+    init() {
+        target = .START_POS
+        eta = 0
+        score = 0
+        stored = MoleculesStack()
+        expertise = MoleculesStack()
+    }
+
+    init(_ inputs: [String]) {
+        target = Position(rawValue: inputs[0])! // position to module
+        eta = Int(inputs[1])! // ignore
+        score = Int(inputs[2])! // player score ... not needed?
+        stored = MoleculesStack(a: Int(inputs[3])!, b: Int(inputs[4])!, c: Int(inputs[5])!, d: Int(inputs[6])!, e: Int(inputs[7])!)
+        expertise = MoleculesStack(a: Int(inputs[8])!, b: Int(inputs[9])!, c: Int(inputs[10])!, d: Int(inputs[11])!, e: Int(inputs[12])!)
+    }
+
+    func fullyLoaded() -> Bool {
+        return stored.sum() == 10
+    }
+
+    func effectiveAmountOfMolecules() -> MoleculesStack {
+        return stored.merged(with: expertise)
+    }
+
+}
+
+struct SampleData {
+
+    let sampleId: Int
+    let carriedBy: Int
+    let rank: Int
+    let expertiseGain: String
+    let health: Int
+    let costs: MoleculesStack
+
+    init(_ inputs: [String]) {
+        sampleId = Int(inputs[0])! // unique id for sample
+        carriedBy = Int(inputs[1])! // 0 = me, 1 = other, -1 = cloud ... only one can cerry a sample
+        rank = Int(inputs[2])! // 1, 2, 3
+        expertiseGain = inputs[3] // ignore
+        health = Int(inputs[4])! // points to gain
+        costs = MoleculesStack(a: Int(inputs[5])!, b: Int(inputs[6])!, c: Int(inputs[7])!, d: Int(inputs[8])!, e: Int(inputs[9])!)
+    }
+
+    func amountOfMolecules() -> Int {
+        return costs.sum()
+    }
+
+    func isAnalyzed() -> Bool {
+        return health > -1
+    }
+}
+
+// MARK: Helper funcs
+
+if mode == .DEBUG {
+    func readLine() -> String {
+        return ""
+    }
+}
+
+func projectCountValue() -> Int {
+    if mode == .DEBUG {
+        return 3
+    }
+    return Int(readLine()!)!
+}
+
+func projectInputes(for index: Int) -> [String] {
+    if mode == .DEBUG {
+        let inputes =  [["0", "0", "0", "4", "4"],["4", "4", "0", "0", "0"],["0", "0", "3", "3", "3"]]
+        return inputes[index]
+    }
+
+    return (readLine()!).characters.split{$0 == " "}.map(String.init)
+}
+
+func playerData(for index: Int) -> Robot {
+    if mode == .DEBUG {
+        // here i can define round
+        let data = [["START_POS", "2", "2", "2", "2", "2", "0", "0", "0", "0", "0", "0", "0"],
+                    ["START_POS", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]]
+        return Robot(data[index])
+    }
+
+    let data = (readLine()!).characters.split{$0 == " "}.map(String.init)
+    return Robot(data)
+}
+
+func availableMoleculesData() -> MoleculesStack {
+
+    if mode == .DEBUG {
+        let data = ["5", "5", "5", "5", "5"]
+        return MoleculesStack(data)
+    }
+
+    return MoleculesStack( (readLine()!).characters.split{$0 == " "}.map(String.init))
+}
+
+func sampleDatasCount() -> Int {
+    if mode == .DEBUG {
+        return 1
+    }
+    return Int(readLine()!)!
+}
+
+func sampleDatas(for index: Int) -> SampleData {
+    if mode == .DEBUG {
+        let inputs = [["0", "0", "1", "0", "-1", "-1", "-1", "-1", "-1", "-1"]]
+        return SampleData(inputs[index])
+    }
+
+    return SampleData((readLine()!).characters.split{$0 == " "}.map(String.init))
+}
+
+let projectCount = projectCountValue()
+var projects: [MoleculesStack] = []
+if projectCount > 0 {
+    for i in 0...(projectCount-1) {
+        let inputs = projectInputes(for: i)
+        let reachableExpertise = MoleculesStack(inputs)
+        projects.append(reachableExpertise)
+    }
+}
+
+var player = Robot()
+var availableMolecules = MoleculesStack()
+var sampleDatas: [SampleData] = []
+
+func neededMoleculesForProjects() -> Set<String> {
+    var molecules = Set<String>()
+    for project in projects {
+        if project.a > player.expertise.a {
+            molecules.insert("A")
+        }
+        if project.b > player.expertise.b {
+            molecules.insert("B")
+        }
+        if project.c > player.expertise.c {
+            molecules.insert("C")
+        }
+        if project.d > player.expertise.d {
+            molecules.insert("D")
+        }
+        if project.e > player.expertise.e {
+            molecules.insert("E")
+        }
+    }
+
+    return molecules
+}
+
+/*
+ Collect_Samples - Check Cloud Samples, if possible to create, Get Full Samples -> as long its 3
+ */
+// MARK: Samples
+func collectSamples() {
+    // Here i know, i want a new SAMPLE
+
+    if player.target != .SAMPLES {
+        print("GOTO \(Position.SAMPLES)")
+        return
+    }
+    var rank = player.rank
+
+    if sampleDatas.lazy.filter({$0.carriedBy == 0}).count == 2 {
+        rank = max(1, rank - 1)
+    }
+
+    // TEST <-
+    print("CONNECT \(rank)")
+    // TEST ->
+}
+
+func needsCollectSamples() -> Bool {
+    let carryingSamples = sampleDatas.lazy.filter({ $0.carriedBy == 0 })
+
+    if carryingSamples.count < 3 {
+        return true
+    }
+
+    return false
+}
+
+func needsToSendSampleToCloud() -> Bool {
+    let samples = sampleDatas.lazy.filter({ $0.carriedBy == 0 && $0.isAnalyzed() })
+
+    if player.target == .SAMPLES {
+        if samples.count < 3 {
+            return false
+        }
+    }
+
+    if player.target == .DIAGNOSIS {
+        if samples.isEmpty {
+            return false
+        }
+    }
+
+    return true
+}
+
+func sendSampleToCloud() {
+    if player.target != .DIAGNOSIS {
+        print("GOTO \(Position.DIAGNOSIS)")
+        return
+    }
+
+    guard let sample = sampleDatas.first(where: { $0.carriedBy == 0 }) else {
+        state = .COLLECT_SAMPLES
+        return
+    }
+    print("CONNECT \(sample.sampleId)")
+}
+
+// MARK: Cloud Samples
+//
+
+func firstUsefulCloudSample() -> SampleData? {
+    let neededMolecules = neededMoleculesForProjects()
+    let cloudSamples = sampleDatas.lazy.filter({ sample in
+        if sample.carriedBy == -1 && sample.isAnalyzed() {
+            return neededMolecules.isEmpty || neededMolecules.contains(sample.expertiseGain)
+        }
+        return false
+    })
+
+    let storedMolecules = player.stored
+    let expertise = player.expertise
+
+    for sample in cloudSamples {
+        let currentEffectiveMolecules = storedMolecules.merged(with: expertise)
+        if currentEffectiveMolecules.contains(sample.costs) {
+            return sample
+        }
+
+        let allAvailableMolecules = currentEffectiveMolecules.merged(with: availableMolecules)
+        if allAvailableMolecules.contains(sample.costs) {
+            return sample
+        }
+    }
+
+    return nil
+}
+
+func collectCloudSample() {
+    guard let sample = firstUsefulCloudSample() else {
+        state = .COLLECT_SAMPLES
+        return
+    }
+
+    if player.target != .DIAGNOSIS {
+        print("GOTO \(Position.DIAGNOSIS)")
+        return
+    }
+
+    print("CONNECT \(sample.sampleId)")
+}
+
+func canCollectCloudSample() -> Bool {
+    let sample = firstUsefulCloudSample()
+    let carryingSamples = sampleDatas.lazy.filter({$0.carriedBy == 0})
+    // TODO: Check as well available Molecules
+
+    return sample != nil && carryingSamples.count < 3
+}
+
+// MARK: ANALYZE
+/*
+ 2. Analyze_Samples - Analyize Samples -> as long there is an unalazied
+ */
+
+func analyzeSamples() {
+    if player.target != .DIAGNOSIS {
+        print("GOTO \(Position.DIAGNOSIS)")
+        return
+    }
+
+    guard let sample = firstAnalyzeableSample() else {
+        state = .COLLECT_SAMPLES
+        return
+    }
+    print("CONNECT \(sample.sampleId)")
+}
+
+func needsToAnalyzeSamples() -> Bool {
+    return firstAnalyzeableSample() != nil
+}
+
+func firstAnalyzeableSample() -> SampleData? {
+    return sampleDatas.lazy.first(where: {$0.carriedBy == 0 && !$0.isAnalyzed()})
+}
+
+// MARK: Gather Molecules
+/*
+ 3. Gather_Molecules - Collect Molecules for each Sample, that can be filled. -> first laborathory ready, rest for othe than ->
+ if no is ready and sample can be taken -> Collect_Samples, else -> send all to cloud
+ */
+
+func moleculeToGet() -> String? {
+    let samples = sampleDatas.lazy.filter({$0.carriedBy == 0 && $0.isAnalyzed()}).sorted(by: {$0.health > $1.health})
+    var storedMolecules = player.stored
+    var expertise = player.expertise
+
+    for sample in samples {
+        let currentEffectiveMolecules = storedMolecules.merged(with: expertise)
+        if currentEffectiveMolecules.contains(sample.costs) {
+            storedMolecules.substract(from: sample.costs)
+            expertise.addMolecule(for: sample.expertiseGain)
+            continue;
+        }
+
+        let allAvailableMolecules = currentEffectiveMolecules.merged(with: availableMolecules)
+        if !allAvailableMolecules.contains(sample.costs) {
+            continue
+        }
+
+        if currentEffectiveMolecules.a < sample.costs.a && availableMolecules.a >= (sample.costs.a - currentEffectiveMolecules.a) {
+            return "A"
+        }
+        if currentEffectiveMolecules.b < sample.costs.b && availableMolecules.b >= (sample.costs.b - currentEffectiveMolecules.b) {
+            return "B"
+        }
+        if currentEffectiveMolecules.c < sample.costs.c && availableMolecules.c >= (sample.costs.c - currentEffectiveMolecules.c) {
+            return "C"
+        }
+        if currentEffectiveMolecules.d < sample.costs.d && availableMolecules.d >= (sample.costs.d - currentEffectiveMolecules.d) {
+            return "D"
+        }
+        if currentEffectiveMolecules.e < sample.costs.e && availableMolecules.e >= (sample.costs.e - currentEffectiveMolecules.e) {
+            return "E"
+        }
+    }
+
+    return thiefModeMolecule()
+}
+
+func thiefModeMolecule() -> String? {
+    // TODO: steel molecule where expertise is low on enemy?
+    // steel molecule of needed from enemy
+    if player.stored.sum() < 10 &&
+        player.stored.a < 5 &&
+        player.stored.b < 5 &&
+        player.stored.c < 5 &&
+        player.stored.d < 5 &&
+        player.stored.e < 5 {
+
+        var value = -1
+        var molecule = ""
+
+        if availableMolecules.a > 0 {
+            value = availableMolecules.a
+            molecule = "A"
+        }
+
+        if availableMolecules.b < value && availableMolecules.b > 0 {
+            value = availableMolecules.b
+            molecule = "B"
+        }
+        if availableMolecules.c < value && availableMolecules.c > 0 {
+            value = availableMolecules.c
+            molecule = "C"
+        }
+        if availableMolecules.d < value && availableMolecules.d > 0 {
+            value = availableMolecules.d
+            molecule = "D"
+        }
+        if availableMolecules.e < value && availableMolecules.e > 0 {
+            value = availableMolecules.e
+            molecule = "E"
+        }
+
+        if value > 0 {
+            return molecule
+        }
+    }
+    return nil
+}
+
+func gatherMolecules() {
+
+    if player.target != .MOLECULES {
+        print("GOTO \(Position.MOLECULES)")
+        return
+    }
+
+    guard let molecule = moleculeToGet() else {
+        state = .LABORATHORY
+        return
+    }
+    print("CONNECT \(molecule)")
+}
+
+func needsToGatherMolecules() -> Bool {
+    if player.fullyLoaded() {
+        return false
+    }
+
+    return moleculeToGet() != nil
+}
+
+// MARK: LABORATORY
+/*
+ 4. Laborathory - Send Sample to Laborathory -> if one or more sample is not ready - Gather_Molecules, else Collect_Samples
+ */
+func getFirstPeoduceableSample() -> SampleData? {
+    let sample = sampleDatas.first(where: { $0.carriedBy == 0 && $0.health != -1 && player.effectiveAmountOfMolecules().contains($0.costs)})
+
+    return sample
+}
+
+func canProduceSample() -> Bool {
+    let sample = getFirstPeoduceableSample()
+    return sample != nil
+}
+
+func produceSample() {
+    if player.target != .LABORATORY {
+        print("GOTO \(Position.LABORATORY)")
+        return
+    }
+
+    guard let sample = getFirstPeoduceableSample() else {
+        // well, should not happen
+        return
+    }
+
+    print("CONNECT \(sample.sampleId)")
+}
+
+// MARK: State Handlind
+func handleState(_ theState: State) {
+    switch theState {
+    case .COLLECT_SAMPLES:
+        if needsCollectSamples() {
+            if canCollectCloudSample() {
+                state = .GATHER_CLOUD_SAMPLE
+                return
+            }
+            collectSamples()
+            return
+        }
+
+        if needsToSendSampleToCloud() {
+            state = .SEND_SAMPLES_TO_CLOUD
+            return
+        }
+
+        // check here if needs to send to cloud
+        state = .ANALYZE_SAMPLES
+        return
+    case .SEND_SAMPLES_TO_CLOUD:
+        if needsToSendSampleToCloud() {
+            sendSampleToCloud()
+            return
+        }
+
+        state = .COLLECT_SAMPLES
+        return
+    case .ANALYZE_SAMPLES:
+        if needsToAnalyzeSamples() {
+            analyzeSamples()
+            return
+        }
+
+        // Check analyzed Samples against usefullnes
+        let neededMolecules = neededMoleculesForProjects()
+
+        let storedMolecules = player.stored
+        let expertise = player.expertise
+        let samples = sampleDatas.lazy.filter({ $0.carriedBy == 0 && $0.isAnalyzed()})
+
+        for sample in samples {
+            if !neededMolecules.isEmpty && !neededMolecules.contains(sample.expertiseGain) {
+                debug("Not Needed")
+                debug("\(neededMolecules)")
+                print("CONNECT \(sample.sampleId)")
+                return
+            }
+            let currentEffectiveMolecules = storedMolecules.merged(with: expertise)
+            let allAvailableMolecules = currentEffectiveMolecules.merged(with: availableMolecules)
+            if !allAvailableMolecules.contains(sample.costs) {
+                debug("Not Producable")
+                print("CONNECT \(sample.sampleId)")
+                return
+            }
+        }
+
+
+        state = .GATHER_MOLECULES
+        return
+    case .GATHER_MOLECULES:
+        if needsToGatherMolecules() {
+            gatherMolecules()
+            return
+        }
+        state = .LABORATHORY
+        return
+    case .LABORATHORY:
+        if canProduceSample() {
+            produceSample()
+            return
+        }
+        // Go Back to molecules to get the other
+        if needsToGatherMolecules() {
+            state = .GATHER_MOLECULES
+            return
+        }
+
+        state = .COLLECT_SAMPLES
+        return
+    case .GATHER_CLOUD_SAMPLE:
+        if canCollectCloudSample() {
+            collectCloudSample()
+            return
+        }
+        state = .LABORATHORY
+        return
+    }
+}
+
+var state: State? = nil {
+    didSet {
+        guard let newState = state else {
+            return
+        }
+        handleState(newState)
+    }
+}
+
+// game loop
+while mode == .GAME {
+    // PLAYER DATA
+    var robots: [Robot] = []
+    for i in 0...1 {
+        let robot = playerData(for: i)
+        robots.append(robot)
+    }
+    player = robots[0]
+    availableMolecules = availableMoleculesData()
+
+    // SAMPLE DATA
+    let sampleCount = sampleDatasCount()
+    sampleDatas = []
+    if sampleCount > 0 {
+        for i in 0...(sampleCount-1) {
+            let sampleData = sampleDatas(for: i)
+            sampleDatas.append(sampleData)
+        }
+    }
+
+    let samples = sampleDatas.lazy.filter({$0.carriedBy == 0}).sorted(by: {$0.health > $1.health})
+    for sample in samples {
+        debug("\(sample)")
+    }
+    debug("\(projects)")
+    let samplesOther = sampleDatas.lazy.filter({$0.carriedBy == 1}).sorted(by: {$0.health > $1.health})
+    for sample in samplesOther {
+        debug("\(sample)")
+    }
+
+    if player.eta > 0 {
+        print("ETA: \(player.eta)")
+        continue;
+    }
+
+    guard let currentState = state else {
+        state = .COLLECT_SAMPLES
+        continue
+    }
+
+    handleState(currentState)
+}
+

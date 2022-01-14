@@ -5,7 +5,7 @@ import Foundation
 public class GameViewController : UIViewController {
     
     var boardView: BoardView?
-    var grid = Grid()
+    var grid = Grid(position: (0,0), mark: .Empty)
     var solver = Solver()
     
     public init() {
@@ -26,8 +26,9 @@ public class GameViewController : UIViewController {
         boardView.addBlock = { position in
             self.grid.turn = .Player
             self.grid.makeMove(tile: Tile(position: position, mark: .Player))
-            self.aiMove()
             self.grid.printBoard()
+            self.aiMove()
+            
         }
         self.view.addSubview(boardView)
         self.boardView = boardView
@@ -36,7 +37,7 @@ public class GameViewController : UIViewController {
     }
     
     @objc func reset() {
-        grid = Grid()
+        grid = Grid(position: (0,0), mark: .Empty)
         grid.turn = .Player
         boardView!.reset()
     }

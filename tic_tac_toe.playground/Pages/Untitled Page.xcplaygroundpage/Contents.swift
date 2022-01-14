@@ -1,5 +1,3 @@
-import UIKit
-
 import PlaygroundSupport
 import UIKit
 
@@ -148,7 +146,7 @@ PlaygroundPage.current.liveView = game
 
 /*
  
- // RANK 
+ // RANK 4
  
  // game loop
  while true {

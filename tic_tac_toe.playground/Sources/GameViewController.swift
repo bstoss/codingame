@@ -34,6 +34,15 @@ public class GameViewController : UIViewController {
         self.boardView = boardView
         boardView.center = CGPoint(x: view.bounds.midX, y: 200)
         boardView.autoresizingMask = [.flexibleLeftMargin]
+        
+        let resAction = UIAction(title: "Reset") { _ in
+            self.reset()
+        }
+        let reset = UIButton(type: .system, primaryAction: resAction)
+        reset.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(reset)
+        reset.centerXAnchor.constraint(equalTo: boardView.centerXAnchor).isActive = true
+        reset.topAnchor.constraint(equalTo: boardView.bottomAnchor, constant: 20).isActive = true
     }
     
     @objc func reset() {

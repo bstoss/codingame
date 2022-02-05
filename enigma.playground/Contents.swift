@@ -48,25 +48,18 @@ if operation == "ENCODE" {
         guard let startIndex = alphabet.firstIndex(of: char) else {
             continue
         }
-        let startInt = startIndex.utf16Offset(in: alphabet)
-        var targetInt = startInt + shift
-        while targetInt > 26{
-            targetInt-=26
+        let intIndex = startIndex.utf16Offset(in: alphabet)
+        if (intIndex + shift) >= 26 {
+            let sum = intIndex + shift
+            let minus = sum - (26*(Int(exactly: sum/26)!))
+            let offset = minus - intIndex
+            let index = alphabet.index(startIndex, offsetBy: offset)
+            shiftedMessage += alphabet[index...index]
+        } else {
+            let index = alphabet.index(startIndex, offsetBy: shift)
+            shiftedMessage += alphabet[index...index]
         }
-        targetInt = startInt - targetInt
-//        if (intIndex + shift) >= 26 {
-//            let sum = intIndex + shift
-//            let minus = sum - (26*(Int(exactly: sum/26)!))
-//            let offset = minus - intIndex
-//            let index = alphabet.index(startIndex, offsetBy: offset)
-//            shiftedMessage += alphabet[index...index]
-//        } else {
-//            let index = alphabet.index(startIndex, offsetBy: shift)
-//            shiftedMessage += alphabet[index...index]
-//        }
-        let targetIndex = alphabet.index(startIndex, offsetBy: targetInt)
-        let newChar = alphabet[targetIndex]
-        shiftedMessage += String(newChar)
+ 
         shift += 1
     }
 

@@ -1,10 +1,14 @@
 import PlaygroundSupport
 import UIKit
 
-let game = GameViewController()
+let strin = "$0"
 
-game.preferredContentSize = game.view.frame.size
-PlaygroundPage.current.liveView = game
+print(strin.contains(separator: "$"))
+
+//let game = GameViewController()
+//
+//game.preferredContentSize = game.view.frame.size
+//PlaygroundPage.current.liveView = game
 
 //
 //

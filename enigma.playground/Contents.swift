@@ -1,14 +1,53 @@
+// https://www.codingame.com/ide/puzzle/encryptiondecryption-of-enigma-machine
+
 import UIKit
 import Darwin
 
+// input from game
+var inputEncode = ["ENCODE",
+             "4",
+             "BDFHJLCPRTXVZNYEIWGAKMUSQO",
+             "AJDKSIRUXBLHWTMCQGZNPYFVOE",
+             "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
+             "AAA"]
+var expectedEncode = ["KQF"]
 
-func shiftMessage(withRotors rotors: [String], message: String, operation: String) -> String {
+var inputDecode = ["DECODE",
+                 "5",
+                 "BDFHJLCPRTXVZNYEIWGAKMUSQO",
+                 "AJDKSIRUXBLHWTMCQGZNPYFVOE",
+                 "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
+                 "XPCXAUPHYQALKJMGKRWPGYHFTKRFFFNOUTZCABUAEHQLGXREZ"]
+
+var expectedDecode = ["THEQUICKBROWNFOXJUMPSOVERALAZYSPHINXOFBLACKQUARTZ"]
+
+func readLine() -> String? {
+    return inputEncode.removeFirst()
+}
+
+func expected() -> String {
+    return expectedEncode.removeFirst()
+}
+
+// Code starts here
+let operationInput = readLine()!
+let pseudoRandomNumber = Int(readLine()!)!
+var rotors: [String] = []
+for i in 0...2 {
+    let rotor = readLine()!
+    rotors.append(rotor)
+}
+let message = readLine()!
+
+let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func rotorMessage(withRotors rotors: [String], message: String, operation: Operation) -> String {
     
     var shiftedMessage = message
-    for rotor in operation == "ENCODE" ? rotors : rotors.reversed() {
+    for rotor in operation == .encode ? rotors : rotors.reversed() {
         var newShift = ""
         for char in shiftedMessage {
-            if operation == "ENCODE" {
+            if operation == .encode {
                 guard let index = alphabet.firstIndex(of: char) else {
                     continue
                 }
@@ -27,49 +66,29 @@ func shiftMessage(withRotors rotors: [String], message: String, operation: Strin
 }
 
 
-
-let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-let operation = "ENCODE"
-let startingShift = 7
-let rotors = ["BDFHJLCPRTXVZNYEIWGAKMUSQO",
-              "AJDKSIRUXBLHWTMCQGZNPYFVOE",
-              "EKMFLGDQVZNTOWYHXUSPAIBRCJ"]
-//let message = "PQSACVVTOISXFXCIAMQEM"
-let message = "WEATHERREPORTWINDYTODAY"
-//let result = "EVERYONEISWELCOMEHERE"
-let result = "ALWAURKQEQQWLRAWZHUYKVN"
-
-if operation == "ENCODE" {
+func encode(_ message: String, rotors: [String], pseudoRandomNumber: Int) -> String {
     var shiftedMessage = ""
-    var shift = startingShift
-    for char in message {
-        
-        guard let startIndex = alphabet.firstIndex(of: char) else {
-            continue
-        }
-        let intIndex = startIndex.utf16Offset(in: alphabet)
-        if (intIndex + shift) >= 26 {
-            let sum = intIndex + shift
-            let minus = sum - (26*(Int(exactly: sum/26)!))
-            let offset = minus - intIndex
-            let index = alphabet.index(startIndex, offsetBy: offset)
-            shiftedMessage += alphabet[index...index]
-        } else {
-            let index = alphabet.index(startIndex, offsetBy: shift)
-            shiftedMessage += alphabet[index...index]
-        }
- 
-        shift += 1
-    }
-
-    let rotatedMessage = shiftMessage(withRotors: rotors, message: shiftedMessage, operation: operation)
+    var shift = pseudoRandomNumber
     
-    print(rotatedMessage)
-} else {
-    let rotatedMessage = shiftMessage(withRotors: rotors, message: result, operation: operation)
+    shiftedMessage = message.map { char in
+        let startIndex = alphabet.firstIndex(of: char)!
+        let intIndex = startIndex.utf16Offset(in: alphabet)
+        let targetIndex = Int(exactly: (intIndex+shift)%alphabet.count)!
+        
+        let index = alphabet.index(startIndex, offsetBy: targetIndex - intIndex)
+        let newChar = alphabet[index]
+        shift += 1
+        
+        return String(newChar)
+    }.joined()
+
+    return rotorMessage(withRotors: rotors, message: shiftedMessage, operation: .encode)
+}
+
+func decode(_ message: String, rotors: [String], pseudoRandomNumber: Int) -> String {
+    let rotatedMessage = rotorMessage(withRotors: rotors, message: message, operation: .decode)
     var shiftedMessage = ""
-    var shift = startingShift
+    var shift = pseudoRandomNumber
     
     for char in rotatedMessage {
 
@@ -83,11 +102,29 @@ if operation == "ENCODE" {
         let targetIndex = alphabet.index(startIndex, offsetBy: targetInt)
         
         let newChar = alphabet[targetIndex]
-        print(newChar)
         shiftedMessage += String(newChar)
 
         shift += 1
     }
     
-    print(shiftedMessage)
+    return shiftedMessage
 }
+
+enum Operation: String {
+    case encode = "ENCODE"
+    case decode = "DECODE"
+}
+
+let operation = Operation(rawValue: operationInput)!
+
+switch operation {
+case .encode:
+    let encodedMessage = encode(message, rotors: rotors, pseudoRandomNumber: pseudoRandomNumber)
+    print(encodedMessage)
+case .decode:
+    let decodedMessage = decode(message, rotors: rotors, pseudoRandomNumber: pseudoRandomNumber)
+    print(decodedMessage)
+}
+
+// code ends here
+print(expected())

@@ -48,7 +48,6 @@ func expected() -> String {
 
 // code begins here
 
-
 func debug(_ message: String) {
 //    print(message, to: &errStream)
     print(message)
@@ -113,3 +112,4 @@ print(output)
 // end code
 
 print(expected())
+

@@ -84,6 +84,7 @@ while !s.isEmpty {
             currentPos += bi.count
             output += String(UnicodeScalar(ci)!)
             s.removeSubrange(s.startIndex...endIndex)
+            
             changed = true
             
             debug(s)

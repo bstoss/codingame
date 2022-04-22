@@ -205,6 +205,7 @@ while loop() {
             // attack monster within 5.5k range if threatForMyBase
             
             var heroHasTarget = false
+            let heroId = playerUnits[i].id
             
             let dangerMonster = monsterUnits.filter({ $0.targetsBase && $0.threatFor == .playerBase && !$0.isTargeted})
             for monster in dangerMonster {
@@ -213,7 +214,7 @@ while loop() {
                 }
                 
                 // if hero is nearest, if not check warn
-                if heroes.first?.id == i {
+                if heroes.first?.id == heroId {
                     heroHasTarget = true
                     monster.isTargeted = true
                     print(Command.move(monster.position).printOut)
@@ -222,14 +223,14 @@ while loop() {
             }
             
             if !heroHasTarget {
-                let warnMonsters = monsterUnits.filter({ $0.threatFor == .playerBase && !$0.isTargeted})
+                let warnMonsters = monsterUnits.filter({ $0.threatFor == .playerBase && !$0.isTargeted && distance(lPos: $0.position, rPos: base.position) < 8_000 })
                 for monster in warnMonsters {
                     let heroes = playerUnits.filter({ !$0.hasTask }).sorted { l, r in
                         return distance(lPos: l.position, rPos: monster.position) < distance(lPos: r.position, rPos: monster.position)
                     }
                     
                     // if hero is nearest, if not check warn
-                    if heroes.first?.id == i {
+                    if heroes.first?.id == heroId {
                         heroHasTarget = true
                         monster.isTargeted = true
                         print(Command.move(monster.position).printOut)

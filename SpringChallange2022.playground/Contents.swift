@@ -1,18 +1,19 @@
 /// https://www.codingame.com/ide/challenge/spring-challenge-2022
 
 import Foundation
+import Darwin
 
-var input = ["0 0",
+var input = ["17630 9000",
              "3",
              "3 0",
              "3 0",
              "6",
-             "0 1 1131 1131 0 0 -1 -1 -1 -1 -1",
-             "1 1 1414 849 0 0 -1 -1 -1 -1 -1",
-             "2 1 849 1414 0 0 -1 -1 -1 -1 -1",
-             "3 2 16499 7869 0 0 -1 -1 -1 -1 -1",
-             "4 2 16216 8151 0 0 -1 -1 -1 -1 -1",
-             "5 2 16781 7586 0 0 -1 -1 -1 -1 -1"]
+             "0 1 16499 7869 0 0 -1 -1 -1 -1 -1",
+             "1 1 16216 8151 0 0 -1 -1 -1 -1 -1",
+             "2 1 16781 7586 0 0 -1 -1 -1 -1 -1",
+             "3 2 1131 1131 0 0 -1 -1 -1 -1 -1",
+             "4 2 1414 849 0 0 -1 -1 -1 -1 -1",
+             "5 2 849 1414 0 0 -1 -1 -1 -1 -1"]
 
 func read() -> String {
     return input.removeFirst()
@@ -34,19 +35,19 @@ func debug(_ mess: Any) {
 /*
  
  func debug(_ mess: Any) {
-     print("Debug: \(mess)", to: &errStream)
+ print("Debug: \(mess)", to: &errStream)
  }
-
+ 
  func loop() -> Bool {
-     return true
+ return true
  }
-
+ 
  func read() -> String {
-     let line = readLine()!
-     debug(line)
-     return line
+ let line = readLine()!
+ debug(line)
+ return line
  }
-
+ 
  */
 
 // REAL CODE here
@@ -86,6 +87,7 @@ class Monster: Unit {
     let health: Int
     let targetsBase: Bool
     let threatFor: ThreatFor
+    var isTargeted: Bool = false
     
     init(
         id: Int,
@@ -105,7 +107,7 @@ class Monster: Unit {
 }
 
 class Hero: Unit {
-    
+    var hasTask: Bool = false
 }
 
 enum Command {
@@ -126,6 +128,14 @@ enum Command {
 }
 
 
+func distance(lPos: Position, rPos: Position) -> Float {
+    let xx = pow(Double(lPos.0 - rPos.0), 2)
+    let yy = pow(Double(lPos.1 - rPos.1), 2)
+    
+    let distance = sqrtf(Float(yy) + Float(xx))
+    return distance
+}
+
 /**
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
@@ -138,9 +148,9 @@ let heroesPerPlayer = Int(read())! // Always 3
 
 var base = Base(position: (x: baseX, y: baseY))
 
-let guardPos: [Int: Position] = [0: (x: 4000, y: 4000),
-                                 1: (x: 5500, y: 1700),
-                                 2: (x: 1700, y: 5500)]
+let guardPos: [Int: Position] = [0: (x: abs(baseX - 3400), y: abs(baseY - 3000)),
+                                 1: (x: abs(baseX - 4000), y: abs(baseY - 1200)),
+                                 2: (x: abs(baseX - 1700), y: abs(baseY - 4000))]
 // game loop
 while loop() {
     
@@ -151,8 +161,8 @@ while loop() {
     for _ in 0...1 {
         let _ = (read()).split(separator: " ").map(String.init)
         // currently not used ... or usefule
-//        let health = Int(inputs[0])! // Each player's base health
-//        let mana = Int(inputs[1])! // Ignore in the first league; Spend ten mana to cast a spell
+        //        let health = Int(inputs[0])! // Each player's base health
+        //        let mana = Int(inputs[1])! // Ignore in the first league; Spend ten mana to cast a spell
     }
     let entityCount = Int(read())! // Amount of heros and monsters you can see
     if entityCount > 0 {
@@ -191,10 +201,47 @@ while loop() {
     if heroesPerPlayer > 0 {
         for i in 0...(heroesPerPlayer-1) {
             
-           
+            // check monsters targeting my base when in 5k range
+            // attack monster within 5.5k range if threatForMyBase
+            
+            var heroHasTarget = false
+            
+            let dangerMonster = monsterUnits.filter({ $0.targetsBase && $0.threatFor == .playerBase && !$0.isTargeted})
+            for monster in dangerMonster {
+                let heroes = playerUnits.filter({ !$0.hasTask }).sorted { l, r in
+                    return distance(lPos: l.position, rPos: monster.position) < distance(lPos: r.position, rPos: monster.position)
+                }
+                
+                // if hero is nearest, if not check warn
+                if heroes.first?.id == i {
+                    heroHasTarget = true
+                    monster.isTargeted = true
+                    print(Command.move(monster.position).printOut)
+                    break;
+                }
+            }
+            
+            if !heroHasTarget {
+                let warnMonsters = monsterUnits.filter({ $0.threatFor == .playerBase && !$0.isTargeted})
+                for monster in warnMonsters {
+                    let heroes = playerUnits.filter({ !$0.hasTask }).sorted { l, r in
+                        return distance(lPos: l.position, rPos: monster.position) < distance(lPos: r.position, rPos: monster.position)
+                    }
+                    
+                    // if hero is nearest, if not check warn
+                    if heroes.first?.id == i {
+                        heroHasTarget = true
+                        monster.isTargeted = true
+                        print(Command.move(monster.position).printOut)
+                        break;
+                    }
+                }
+            }
             
             // In the first league: MOVE <x> <y> | WAIT; In later leagues: | SPELL <spellParams>;
-            print(Command.move(guardPos[i]!).printOut)
+            if !heroHasTarget {
+                print(Command.move(guardPos[i]!).printOut)
+            }
         }
     }
 }

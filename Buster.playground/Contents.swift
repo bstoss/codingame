@@ -3,13 +3,13 @@
 import UIKit
 // Version  Bronze League
 
-1
+
 enum Team: Int {
     case Orange = 0
     case Purple = 1
 }
 
- */
+ 
 /**
  * Send your busters out into the fog to trap ghosts and bring them home!
  **/

@@ -2,18 +2,8 @@
 
 import UIKit
 
-// input from game 
-var input = ["16000 9000",
-             "9",
-             "................",
-             "................",
-             "................",
-             "................",
-             "................",
-             "....x...........",
-             "................",
-             "................",
-             "................"]
+// input from game not setup to work
+var input = ["0"]
 
 func readLine() -> String? {
     return input.removeFirst()
@@ -131,7 +121,6 @@ func reachableWithoutKilled<T: MapObject>(for humans: [T], zombies: [T], to obj:
                 return false
             }
 
-            // if no zombie is near, skip that human ... 3k is near or not? :D -> 38k. 4k made 40k points
             if distanceHuZo > 4000 {
                 return false
             }
@@ -210,6 +199,12 @@ while true {
         }
     }
 
+    if zombieCount == 1 {
+        let zombie = zombies.first!
+        print("\(zombie.target.printableCoord)")
+        continue
+    }
+
     // finde den nahesten Mensch, den ein Zombie angreift, den ich noch retten kann.
 
     // finde den nahesten Zombie, der einen Menschen angreift, den ich noch töten kann
@@ -219,12 +214,15 @@ while true {
     
     let moveTo: MapObject
 
-    // 38k Points
+
+
+    // 60k Points
     // filter humans who can be saved by walking to him
     let sHumans = nearestList(for: humans, to: ash)
     let savableHumans = reachableWithoutKilled(for: sHumans, zombies: zombies, to: ash)
     let ssavableHumans = nearestList(for: savableHumans, to: ash)
-    
+
+
     if let human = ssavableHumans.first {
         moveTo = human
     } else if let human = sHumans.first {
@@ -232,6 +230,8 @@ while true {
     } else {
         moveTo = ash
     }
+
+    let zombie = nearestList(for: zombies, to: moveTo).first!
     
     // 41k points
     /*
@@ -247,5 +247,5 @@ while true {
     }
     */
 
-    print("\(moveTo.point.printableCoord)") // Your destination coordinates
+    print("\(zombie.point.printableCoord)") // Your destination coordinates
 }

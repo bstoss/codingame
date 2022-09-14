@@ -207,6 +207,8 @@ while loop() {
             var heroHasTarget = false
             let heroId = playerUnits[i].id
             
+            
+            // TODO: target monster with more heroes
             let dangerMonster = monsterUnits.filter({ $0.targetsBase && $0.threatFor == .playerBase && !$0.isTargeted})
             for monster in dangerMonster {
                 let heroes = playerUnits.filter({ !$0.hasTask }).sorted { l, r in

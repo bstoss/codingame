@@ -28,8 +28,6 @@ func readLine() -> String? {
 
 /// Code begins here
 ///
-import Glibc
-import Foundation
 
 public struct StderrOutputStream: TextOutputStream {
     public mutating func write(_ string: String) { fputs(string, stderr) }
@@ -37,7 +35,7 @@ public struct StderrOutputStream: TextOutputStream {
 public var errStream = StderrOutputStream()
 
 func debug(_ message: String) {
-   // debugPrint(message, to: &errStream)
+    //debugPrint(message, to: &errStream)
     //print(message)
 }
 
@@ -148,8 +146,7 @@ class Cell: MapObject {
     }
 }
 
-
-func nearest<T: MapObject>(for units: [T], to obj: T) -> T? {
+func nearest<T: Cell>(for units: [T], to obj: T, excluding: Set<Point>? = nil, minOre: Int? = nil) -> T? {
     
     let sortedUnits = units.sorted { (left, right) -> Bool in
         let ldistance = left.point.distance(to: obj.point)
@@ -157,7 +154,22 @@ func nearest<T: MapObject>(for units: [T], to obj: T) -> T? {
         return ldistance < rdistance
     }
     
-    return sortedUnits.first
+    guard let excl = excluding else {
+        return sortedUnits.first
+    }
+    
+    return sortedUnits.first(where: { cell in
+        guard let excl = excluding, !excl.contains(cell.point) else {
+            return false
+        }
+        if let minO = minOre {
+            guard let cellO = cell.ores, cellO >= minO  else {
+                return false
+            }
+            return true
+        }
+        return true
+    })
 }
 
 func nearestList<T: MapObject>(for units: [T], to obj: T) -> [T] {
@@ -203,6 +215,9 @@ struct Board {
     }
     
     func setEntity(_ entity: Entity, toCellAtPoint p: Point) {
+        guard p.x >= 0, p.y >= 0 else {
+            return
+        }
         (g[p.y]![p.x]! as! Cell).entities.append(entity)
     }
     
@@ -280,8 +295,8 @@ var board = Board(h: height, w: width)
 // game loop
 
 var radarPos: [Point] = [
-    Point(x: 4, y: 3),
     Point(x: 7, y: 7),
+    Point(x: 4, y: 3),
     Point(x: 4, y: 11),
     Point(x: 12, y: 3),
     Point(x: 15, y: 7),
@@ -292,6 +307,8 @@ var radarPos: [Point] = [
     Point(x: 27, y: 3),
     Point(x: 27, y: 11)
 ]
+
+var trapList: Set<Point> = []
 
 while(true) {
     board.cells = []
@@ -316,7 +333,10 @@ while(true) {
     let trapCooldown = Int(inputs2[2])! // turns left until a new trap can be requested
     
     var playerRobotIds: [Int] = []
+    var wearingRadar = false
     if entityCount > 0 {
+         var newTrapList: Set<Point> = []
+
         for i in 0...(entityCount-1) {
             let inputs = (readLine()!).split(separator: " ").map(String.init)
             let entityId = Int(inputs[0])! // unique id of the entity
@@ -334,8 +354,21 @@ while(true) {
             
             if entityType == .playerRobot {
                 playerRobotIds.append(entityId)
+                if !wearingRadar, item == .trap {
+                    wearingRadar = true
+                }
+            }
+
+            if entityType == .otherRobot, item == .trap {
+                debug("ROBOT GOT TRAP")
+            }
+
+            if entityType == .trap {
+                debug("TRAP")
+                newTrapList.insert(Point(x: x, y: y))
             }
         }
+        trapList = newTrapList
     }
     
     board.printBoard()
@@ -346,9 +379,13 @@ while(true) {
     let radars = board.radarCells()
     
     var requestRadar = false
+    var requestTrap = false
     for i in 0...4 {
         let playerId = playerRobotIds[i]
-        let playerCell = players.first(where: { $0.entity(withId: playerId) != nil })!
+        guard let playerCell = players.first(where: { $0.entity(withId: playerId) != nil }) else {
+            print("WAIT")
+            continue
+        }
         let player = playerCell.entity(withId: playerId)!
         if let item = player.item {
             var didPrint = false
@@ -369,33 +406,57 @@ while(true) {
                 // go home
                 print("MOVE 0 \(playerCell.point.y)")
                 didPrint = true
-            case .trap:
+             case .trap:
                 // dont know
-                print("MOVE")
+                // place it on nearest ore?
+                if let ore = nearest(for: ores, to: playerCell, excluding: trapList, minOre: 2) {
+                    ores.removeAll(where: { cell in
+                        if let ores = cell.ores, ores <= 1, cell.point == ore.point  {
+                            return true
+                        }
+                        return false
+                    })
+                    print("DIG \(ore.point.printableCoord)")
+                    trapList.insert(ore.point)
+                    didPrint = true
+                }
             }
             if didPrint {
                 continue
             }
         }
         
-        if radarCooldown <= 1 && !requestRadar {
+        if !wearingRadar, trapCooldown <= 1, !requestTrap, ores.count >= 5 {
+            print("REQUEST trap")
+            requestTrap = true
+            continue
+        }
+
+        if let ore = nearest(for: ores, to: playerCell, excluding: trapList) {
+            ores.removeAll(where: { cell in
+                if let ores = cell.ores, ores <= 1, cell.point == ore.point  {
+                    return true
+                }
+                return false
+            })
+            print("DIG \(ore.point.printableCoord)")
+            continue
+        }
+
+        if radarCooldown <= 1, !requestRadar {
             print("REQUEST radar")
             requestRadar = true
             continue
         }
+
         
-        if !ores.isEmpty {
-            let ore = ores.removeFirst()
-            print("DIG \(ore.point.printableCoord)")
-            continue
-        }
         
         let digX1 = random(from: max(1, playerCell.point.x - 3), to: max(2, playerCell.point.x))
-        debug("\(digX1)")
+        //debug("\(digX1)")
         let digX2 = random(from: max(3, playerCell.point.x), to: min(width-1, playerCell.point.x + 4))
-        debug("\(digX2)")
+        //debug("\(digX2)")
         let digX = random(from: digX1, to: digX2)
-        debug("\(digX)")
+        //debug("\(digX)")
         
         let digY1 = random(from: max(1, playerCell.point.y - 3), to: max(2, playerCell.point.y))
         let digY2 = random(from: max(3, playerCell.point.y), to: min(height-1, playerCell.point.y + 4))

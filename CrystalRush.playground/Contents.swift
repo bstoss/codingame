@@ -123,6 +123,10 @@ class Cell: MapObject {
     let hole: Bool
     var entities: [Entity] = []
     
+    var isHome: Bool {
+        point.x == 0
+    }
+
     init(x: Int, y: Int, ores: String, hole: Bool) {
         self.ores = Int(ores)
         self.hole = hole
@@ -296,11 +300,14 @@ var board = Board(h: height, w: width)
 
 var radarPos: [Point] = [
     Point(x: 7, y: 7),
+    Point(x: 15, y: 7),
+    Point(x: 12, y: 3),
+    Point(x: 12, y: 11),
+
     Point(x: 4, y: 3),
     Point(x: 4, y: 11),
-    Point(x: 12, y: 3),
-    Point(x: 15, y: 7),
-    Point(x: 12, y: 11),
+    //Point(x: 12, y: 3),
+    //Point(x: 12, y: 11),
     Point(x: 20, y: 3),
     Point(x: 20, y: 11),
     Point(x: 23, y: 7),
@@ -334,6 +341,7 @@ while(true) {
     
     var playerRobotIds: [Int] = []
     var wearingRadar = false
+    var ammountOtherRobot = 0
     if entityCount > 0 {
          var newTrapList: Set<Point> = []
 
@@ -359,8 +367,8 @@ while(true) {
                 }
             }
 
-            if entityType == .otherRobot, item == .trap {
-                debug("ROBOT GOT TRAP")
+            if entityType == .otherRobot {
+                ammountOtherRobot += 1
             }
 
             if entityType == .trap {
@@ -380,6 +388,11 @@ while(true) {
     
     var requestRadar = false
     var requestTrap = false
+    var someoneMovingHome = players.contains(where: { cell in
+        cell.entities.contains(where: { entity in
+            entity.type == .playerRobot && entity.item == .ore
+        })
+    })
     for i in 0...4 {
         let playerId = playerRobotIds[i]
         guard let playerCell = players.first(where: { $0.entity(withId: playerId) != nil }) else {
@@ -426,7 +439,8 @@ while(true) {
             }
         }
         
-        if !wearingRadar, trapCooldown <= 1, !requestTrap, ores.count >= 5 {
+        if (!someoneMovingHome || playerCell.isHome), !wearingRadar, trapCooldown <= 1, !requestTrap, ores.count >= 5, ammountOtherRobot > 0 {
+            // check if not already someone is moving home
             print("REQUEST trap")
             requestTrap = true
             continue
@@ -443,7 +457,8 @@ while(true) {
             continue
         }
 
-        if radarCooldown <= 1, !requestRadar {
+        if (!someoneMovingHome || playerCell.isHome), radarCooldown <= 1, !requestRadar {
+             // check if not already someone is moving home
             print("REQUEST radar")
             requestRadar = true
             continue

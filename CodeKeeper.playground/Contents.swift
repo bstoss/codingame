@@ -172,6 +172,16 @@ enum EntityType: Int {
             return false
         }
     }
+    
+    var isItem: Bool {
+        switch self {
+        case .treasure, .chargeHammer,
+                .chargeScythe, .chargeBow:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 struct Entity {
@@ -302,7 +312,9 @@ struct Board {
     // need 2 dimensions because of faster access
     var g: Grid = [:]
     
-    var entities: [Entity] = []
+    //var entities: [Entity] = []
+    
+    var exit: Entity?
     
     init(h: Int, w: Int) {
         self.h = h
@@ -329,7 +341,11 @@ struct Board {
     
     mutating func setEntity(_ entity: Entity) {
         g[entity.position.y]![entity.position.x] = entity
-        entities.append(entity)
+        
+        if entity.type == .exit {
+            self.exit = entity
+        }
+      //  entities.append(entity)
     }
     
     mutating func setVisited(for position: Position) {
@@ -421,7 +437,6 @@ struct DecissionMaker {
         }
         
         Self.makeMove()
-        
     }
     
     
@@ -441,6 +456,9 @@ struct DecissionMaker {
         if let entity = canAttackWithSword() {
             print("ATTACK 0 \(entity.position.x) \(entity.position.y) Lets kill that \(entity.type.name) with sword")
             return true
+        } else if let entity = canAttackWithHammer() {
+            print("ATTACK 1 \(entity.position.x) \(entity.position.y) Lets kill that \(entity.type.name) with hammer")
+            return true
         } else if let entity = canAttackWithScythe() {
             print("ATTACK 2 \(entity.position.x) \(entity.position.y) Lets kill that \(entity.type.name) with scythe")
             return true
@@ -455,18 +473,104 @@ struct DecissionMaker {
     }
     
     static func makeMove() {
-        
         // need potion and vissible?
+        if let entity = getPotion(), hero.health <= 10 {
+            print("MOVE \(entity.position.x) \(entity.position.y) Lets move to potion")
+            return
+        }
+        
+        // found exit?
+        if let entity = getTheExit() {
+            print("MOVE \(entity.position.x) \(entity.position.y) Lets move to a new field")
+            return
+        }
         
         // treasure somewhere?
+        if let entity = getItem() {
+            print("MOVE \(entity.position.x) \(entity.position.y) Lets move to \(entity.type.name)")
+            return
+        }
         
         // move towards unknown fields?
-        
-        
+        if let entity = findNextNotVisitedPath() {
+            print("MOVE \(entity.position.x) \(entity.position.y) Lets move to a new field")
+            return
+        }
         
         print("MOVE 6 8 MOVE MOVE MOVE")
     }
 }
+
+func getPotion() -> Entity? {
+    let x = hero.position.x
+    let y = hero.position.y
+    for i in 1...2 {
+        let entities: [Entity] = [
+            board.entity(for: (x-i, y)),
+            board.entity(for: (x+i, y)),
+            board.entity(for: (x, y-i)),
+            board.entity(for: (x, y+i)),
+            board.entity(for: (x-i, y-i)),
+            board.entity(for: (x+i, y+i)),
+            board.entity(for: (x+i, y-i)),
+            board.entity(for: (x-i, y+i))
+        ].compactMap { $0 }
+        guard let entity = entities.first(where: { $0.type == .potion }) else {
+            continue
+        }
+        
+        return entity
+    }
+    
+    return nil
+}
+
+func getItem() -> Entity? {
+    let i = 1
+    let x = hero.position.x
+    let y = hero.position.y
+    let entities: [Entity] = [
+        board.entity(for: (x-i, y)),
+        board.entity(for: (x+i, y)),
+        board.entity(for: (x, y-i)),
+        board.entity(for: (x, y+i)),
+        board.entity(for: (x-i, y-i)),
+        board.entity(for: (x+i, y+i)),
+        board.entity(for: (x+i, y-i)),
+        board.entity(for: (x-i, y+i))
+    ].compactMap { $0 }
+    return entities.first(where: { $0.type.isItem })
+}
+
+func getTheExit() -> Entity? {
+    return board.exit
+}
+
+
+func findNextNotVisitedPath() -> Entity? {
+    let x = hero.position.x
+    let y = hero.position.y
+    for i in 1...5 {
+        let entities: [Entity] = [
+            board.entity(for: (x-i, y)),
+            board.entity(for: (x+i, y)),
+            board.entity(for: (x, y-i)),
+            board.entity(for: (x, y+i)),
+            board.entity(for: (x-i, y-i)),
+            board.entity(for: (x+i, y+i)),
+            board.entity(for: (x+i, y-i)),
+            board.entity(for: (x-i, y+i))
+        ].compactMap { $0 }
+        guard let entity = entities.first(where: { $0.type == .path }) else {
+            continue
+        }
+        
+        return entity
+    }
+    
+    return nil
+}
+
 
 
 func canAttackWithSword() -> Entity? {
@@ -502,6 +606,17 @@ func canAttackWithHammer() -> Entity? {
         return nil
     }
         
+    for x in hero.position.x-1...hero.position.x+1 {
+        for y in hero.position.y-1...hero.position.y+1 {
+            guard let entity = board.entity(for: (x, y)),
+                    entity.type.isAttackable,
+                  entity.type != .box else {
+                continue
+            }
+            return entity
+        }
+    }
+    
     return nil
 }
 

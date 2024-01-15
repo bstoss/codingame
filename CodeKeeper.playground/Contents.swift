@@ -2,30 +2,59 @@
 import UIKit
 
 // input from game not setup to work
+//var input = [
+//    "5 10 20 0 5 5 5",
+//    "21",
+//    "7 8 3 10",
+//    "7 9 1 -1",
+//    "7 10 4 1",
+//    "7 11 2 100",
+//    "2 7 9 14",
+//    "2 9 1 -1",
+//    "2 10 11 10",
+//    "2 11 1 -1",
+//    "4 7 1 -1",
+//    "4 10 1 -1",
+//    "6 7 1 -1",
+//    "6 9 1 -1",
+//    "6 10 4 1",
+//    "6 11 1 -1",
+//    "8 7 9 14",
+//    "8 8 1 -1",
+//    "8 9 1 -1",
+//    "8 10 9 14",
+//    "8 11 1 -1",
+//    "3 7 1 -1",
+//    "5 11 11 10"
+//]
+
 var input = [
-    "5 10 20 0 5 5 5",
-    "21",
-    "7 8 3 10",
-    "7 9 1 -1",
-    "7 10 4 1",
-    "7 11 2 100",
-    "2 7 9 14",
-    "2 9 1 -1",
-    "2 10 11 10",
-    "2 11 1 -1",
-    "4 7 1 -1",
-    "4 10 1 -1",
-    "6 7 1 -1",
-    "6 9 1 -1",
-    "6 10 4 1",
-    "6 11 1 -1",
-    "8 7 9 14",
-    "8 8 1 -1",
-    "8 9 1 -1",
-    "8 10 9 14",
-    "8 11 1 -1",
-    "3 7 1 -1",
-    "5 11 11 10"
+    "6 1 11 -6 5 5 4",
+    "24",
+    "7 4 1 -1",
+    "9 0 9 6",
+    "9 1 1 -1",
+    "9 2 1 -1",
+    "9 3 1 -1",
+    "9 4 7 1",
+    "4 0 1 -1",
+    "4 2 1 -1",
+    "4 4 1 -1",
+    "6 0 1 -1",
+    "6 4 1 -1",
+    "8 1 8 6",
+    "8 2 11 10",
+    "8 3 1 -1",
+    "8 4 1 -1",
+    "3 2 3 10",
+    "3 4 4 1",
+    "5 0 2 100",
+    "5 2 1 -1",
+    "5 4 1 -1",
+    "7 0 1 -1",
+    "7 1 1 -1",
+    "7 2 11 10",
+    "7 3 1 -1"
 ]
 
 var isDebug = true
@@ -36,6 +65,10 @@ func readLine() -> String? {
 
 func debug(_ mess: Any) {
     print("Debug: \(mess)")
+}
+
+func setLoop() {
+    loop = false
 }
 
 /// Code begins here
@@ -51,6 +84,11 @@ public var errStream = StderrOutputStream()
 //func debug(_ mess: Any) {
 //    print("Debug: \(mess)", to: &errStream)
 //}
+
+//func setLoop() {
+//    loop = false
+//}
+
 
 func read() -> String? {
     let line = readLine()
@@ -80,6 +118,7 @@ enum EntityType: Int {
     case vampire
     case hero
     case path
+    case visited
     case unknown
     
     var printId: String {
@@ -98,6 +137,7 @@ enum EntityType: Int {
         case .vampire: return "va"
         case .hero: return "he"
         case .path: return "++"
+        case .visited: return "--"
         case .unknown: return ".."
         }
     }
@@ -118,6 +158,7 @@ enum EntityType: Int {
         case .vampire: return "Bloodsucker"
         case .hero: return "Hero"
         case .path: return "++"
+        case .visited: return "--"
         case .unknown: return ".."
         }
     }
@@ -150,7 +191,7 @@ struct Entity {
 }
 
 struct Hero {
-    var position: Position = (0,0)
+    var position: Position = (-1,-1)
     var health: Int = 20
     var score: Int = 0
     var hammer: Int = 0
@@ -179,10 +220,6 @@ enum Weapon {
         case .scythe: return 7
         case .bow: return 8
         }
-    }
-    
-    func canHit(from: Position, to: Position) -> Bool {
-        return true
     }
 }
 
@@ -263,26 +300,40 @@ struct Board {
     let w: Int
     
     // need 2 dimensions because of faster access
-    var g: Grid
+    var g: Grid = [:]
     
     var entities: [Entity] = []
     
     init(h: Int, w: Int) {
         self.h = h
         self.w = w
-        g = [:]
+        reset()
+    }
+    
+    mutating func reset() {
+        var newG: Grid = [:]
         for i in 0..<h {
             var row: Row = [:]
             for j in 0..<w {
-                row[j] = Entity(position: (j, i))
+                if let ent = g[i]?[j], ent.type == .visited {
+                    row[j] = ent
+                } else {
+                    row[j] = Entity(position: (j, i))
+                }
             }
-            g[i] = row
+            newG[i] = row
         }
+        
+        g = newG
     }
     
     mutating func setEntity(_ entity: Entity) {
         g[entity.position.y]![entity.position.x] = entity
         entities.append(entity)
+    }
+    
+    mutating func setVisited(for position: Position) {
+        g[position.y]?[position.x]?.type = .visited
     }
     
     mutating func setPath(for position: Position) {
@@ -324,22 +375,12 @@ var hero = Hero()
 var board = Board(h: 12, w: 16)
 var loop = true
 
-func canAttackWithSword() -> Entity? {
-    
-    for x in hero.position.x-1...hero.position.x+1 {
-        for y in hero.position.y-1...hero.position.y+1 {
-            guard let entity = board.entity(for: (x, y)), entity.type.isAttackable else {
-                continue
-            }
-            return entity
-        }
-    }
-    return nil
-}
-
 // game loop
 while loop {
-    loop = false
+    setLoop()
+    board.setVisited(for: hero.position)
+    board.reset()
+    
     let inputs = (read()!).split(separator: " ").map(String.init)
     let x = Int(inputs[0])! // x position of the hero
     let y = Int(inputs[1])! // y position of the hero
@@ -351,7 +392,7 @@ while loop {
     hero.bow = Int(inputs[6])! // how many times the bow can be used
     
     
-    let visibleEntities = Int(readLine()!)! // the number of visible entities
+    let visibleEntities = Int(read()!)! // the number of visible entities
     if visibleEntities > 0 {
         for _ in 0...(visibleEntities-1) {
             let inputs = (read()!).split(separator: " ").map(String.init)
@@ -368,10 +409,118 @@ while loop {
     board.setEntity(Entity(position: hero.position, type: .hero))
     board.printBoard()
     
-    if let entity = canAttackWithSword() {
-        print("ATTACK 0 \(entity.position.x) \(entity.position.y) Lets kill that \(entity.type.name)")
-    } else {
-        print("MOVE 6 8 MOVE MOVE MOVE")
+    DecissionMaker.makeDecission()
+    
+}
+
+struct DecissionMaker {
+    static func makeDecission() {
+        
+        guard !Self.shouldAttack() else {
+            return
+        }
+        
+        Self.makeMove()
+        
     }
     
+    
+//sword: 10 damage
+//Applies damage to one cell that is a step away (in cardinal direction) from the hero.
+//hammer: 6 damage
+//Applies damage to three cells in range 1. If the given target is diagonal, the attack also hits the closest neighbours in the two adjacent cardinal directions from the hero. If the target is in a cardinal direction, it also hits the closest neighbouring cells in the two diagonal adjacent directions.
+//scythe: 7 damage
+//A target can be any cell in the chess queen move pattern limited to distance 2. The attack applies damage to the two cells covered by a queen move pattern containing the given target cell.
+//bow: 8 damage
+//Applies damage to any single cell visible by the hero (which is in range ≤ 3).
+
+    
+    static func shouldAttack() -> Bool {
+        // 0 for sword, 1 for hammer, 2 for scythe, and 3 for bow.
+
+        if let entity = canAttackWithSword() {
+            print("ATTACK 0 \(entity.position.x) \(entity.position.y) Lets kill that \(entity.type.name) with sword")
+            return true
+        } else if let entity = canAttackWithScythe() {
+            print("ATTACK 2 \(entity.position.x) \(entity.position.y) Lets kill that \(entity.type.name) with scythe")
+            return true
+        } else if let entity = canAttackWithBow() {
+            print("ATTACK 3 \(entity.position.x) \(entity.position.y) Lets kill that \(entity.type.name) with bow")
+            return true
+        }
+        
+        // add hammer and scythe
+        
+        return false
+    }
+    
+    static func makeMove() {
+        
+        // need potion and vissible?
+        
+        // treasure somewhere?
+        
+        // move towards unknown fields?
+        
+        
+        
+        print("MOVE 6 8 MOVE MOVE MOVE")
+    }
+}
+
+
+func canAttackWithSword() -> Entity? {
+    let entities: [Entity] = [
+        board.entity(for: (hero.position.x-1, hero.position.y)),
+        board.entity(for: (hero.position.x+1, hero.position.y)),
+        board.entity(for: (hero.position.x, hero.position.y-1)),
+        board.entity(for: (hero.position.x, hero.position.y+1))
+    ].compactMap { $0 }
+    
+    return entities.first(where: { $0.type.isAttackable })
+}
+
+func canAttackWithScythe() -> Entity? {
+    guard hero.scythe > 0 else {
+        return nil
+    }
+    
+    let entities: [Entity] = [
+        board.entity(for: (hero.position.x-1, hero.position.y-1)),
+        board.entity(for: (hero.position.x+1, hero.position.y+1)),
+        board.entity(for: (hero.position.x-2, hero.position.y-2)),
+        board.entity(for: (hero.position.x+2, hero.position.y+2))
+    ].compactMap { $0 }
+    
+    return entities.first(where: {
+        $0.type.isAttackable && $0.type != .box
+    })
+}
+
+func canAttackWithHammer() -> Entity? {
+    guard hero.hammer > 0 else {
+        return nil
+    }
+        
+    return nil
+}
+
+
+func canAttackWithBow() -> Entity? {
+    guard hero.bow > 0 else {
+        return nil
+    }
+    
+    for x in hero.position.x-3...hero.position.x+3 {
+        for y in hero.position.y-3...hero.position.y+3 {
+            guard let entity = board.entity(for: (x, y)),
+                    entity.type.isAttackable,
+                  entity.type != .box else {
+                continue
+            }
+            return entity
+        }
+    }
+    
+    return nil
 }

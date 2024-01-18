@@ -4,63 +4,6 @@ import UIKit
 // seed with #1 player
 // seed=-2031791945071446300
 
-
-// input from game not setup to work
-//var input = [
-//    "5 10 20 0 5 5 5",
-//    "21",
-//    "7 8 3 10",
-//    "7 9 1 -1",
-//    "7 10 4 1",
-//    "7 11 2 100",
-//    "2 7 9 14",
-//    "2 9 1 -1",
-//    "2 10 11 10",
-//    "2 11 1 -1",
-//    "4 7 1 -1",
-//    "4 10 1 -1",
-//    "6 7 1 -1",
-//    "6 9 1 -1",
-//    "6 10 4 1",
-//    "6 11 1 -1",
-//    "8 7 9 14",
-//    "8 8 1 -1",
-//    "8 9 1 -1",
-//    "8 10 9 14",
-//    "8 11 1 -1",
-//    "3 7 1 -1",
-//    "5 11 11 10"
-//]
-//
-//var input = [
-//    "6 1 11 -6 5 5 4",
-//    "24",
-//    "7 4 1 -1",
-//    "9 0 9 6",
-//    "9 1 1 -1",
-//    "9 2 1 -1",
-//    "9 3 1 -1",
-//    "9 4 7 1",
-//    "4 0 1 -1",
-//    "4 2 1 -1",
-//    "4 4 1 -1",
-//    "6 0 1 -1",
-//    "6 4 1 -1",
-//    "8 1 8 6",
-//    "8 2 11 10",
-//    "8 3 1 -1",
-//    "8 4 1 -1",
-//    "3 2 3 10",
-//    "3 4 4 1",
-//    "5 0 2 100",
-//    "5 2 1 -1",
-//    "5 4 1 -1",
-//    "7 0 1 -1",
-//    "7 1 1 -1",
-//    "7 2 11 10",
-//    "7 3 1 -1"
-//]
-
 var input = [
     "14 0 19 71 4 0 0",
     "17",
@@ -173,16 +116,16 @@ enum EntityType: Int {
         case .exit: return "Exit"
         case .obstacle: return "Obstacke"
         case .treasure: return "Treasure"
-        case .potion: return "Postion"
+        case .potion: return "Potion"
         case .chargeHammer: return "Hammer"
         case .chargeScythe: return "Scythe"
         case .chargeBow: return "Bow"
         case .box: return "Box"
-        case .skeleton: return "Skel"
+        case .skeleton: return "Bone"
         case .gargoyle: return "Bird"
         case .orc: return "Big Boy"
         case .vampire: return "Bloodsucker"
-        case .hero: return "Hero"
+        case .hero: return "... (k)nowhere"
         case .path: return "new horizons"
         case .visited: return "... wait ... deja vu"
         case .unknown: return ".."
@@ -199,13 +142,46 @@ enum EntityType: Int {
         }
     }
     
-    var isItem: Bool {
+    var isMonster: Bool {
         switch self {
-        case .treasure, .chargeHammer,
-                .chargeScythe, .chargeBow:
+        case .skeleton, .gargoyle,
+            .orc, .vampire:
             return true
         default:
             return false
+        }
+    }
+    
+    var isChasingMonster: Bool {
+        switch self {
+        case .gargoyle, .vampire:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var isItem: Bool {
+        switch self {
+        case .treasure, .chargeHammer,
+                .chargeScythe, .chargeBow,
+                .potion:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var isPassable: Bool {
+        self != .obstacle
+    }
+    
+    var isPassableHorseMove: Bool {
+        switch self {
+        case .obstacle, .skeleton, .box:
+            return false
+        default:
+            return true
         }
     }
 }
@@ -484,11 +460,25 @@ while loop {
 struct DecissionMaker {
     static func makeDecission() {
         
-        if let exit = board.exit, turn >= 100 {
+        if let cell = canAttackWithSwordNoBox() {
+            print("ATTACK 0 \(cell.position.x) \(cell.position.y) Lets kill that \(cell.entity.type.name) with sword")
+            return
+        }
+        
+        // if chasing by monster and probaly are diagonal, than move back
+        debug("check for chasing")
+        if let chase = chasing() {
+            print("\(chase.1) \(chase.0.position.x) \(chase.0.position.y) Lets \(chase.1) to \(chase.0.entity.type.name)")
+            return
+        }
+        
+        debug("check for exit if turn gets near end")
+        if let exit = board.exit, turn >= 120 {
             move(to: exit)
             return
         }
         
+        debug("check for attack")
         guard !Self.shouldAttack() else {
             return
         }
@@ -510,9 +500,15 @@ struct DecissionMaker {
     static func shouldAttack() -> Bool {
         // 0 for sword, 1 for hammer, 2 for scythe, and 3 for bow.
 
-        if let cell = getPotion(), hero.health <= 15 {
-            move(to: cell)
-            return true
+        
+        if hero.health < 8 {
+            debug("check for exit")
+            if let cell = getTheExit() {
+                if move(to: cell) {
+                    return true
+                }
+                debug("exit to far away")
+            }
         }
         
         if let cell = canAttackWithSword() {
@@ -523,91 +519,333 @@ struct DecissionMaker {
             print("ATTACK 1 \(cell.position.x) \(cell.position.y) Lets kill that \(cell.entity.type.name) with hammer")
             return true
         }
-        if let cell = canAttackWithScythe() {
-            print("ATTACK 2 \(cell.position.x) \(cell.position.y) Lets kill that \(cell.entity.type.name) with scythe")
-            return true
-        }
         if let cell = canAttackWithBow() {
             print("ATTACK 3 \(cell.position.x) \(cell.position.y) Lets kill that \(cell.entity.type.name) with bow")
             return true
         }
-        
-        // add hammer and scythe
-        
+        if let cell = canAttackWithScythe() {
+            print("ATTACK 2 \(cell.position.x) \(cell.position.y) Lets kill that \(cell.entity.type.name) with scythe")
+            return true
+        }
         return false
     }
     
     static func makeMove() {
-        // need potion and vissible?
-        // attack has prio, thats why this can be to late.
-        // check if path is open to walk through potion, if not, attack
-        if let cell = getPotion(), hero.health <= 10 {
-            move(to: cell)
-            return
-        }
+        
+//        if let cell = getPotion(), hero.health <= 15 {
+//            debug("need potion")
+//            if move(to: cell) {
+//                return
+//            }
+//            debug("potion to far away")
+//        }
         
         // treasure somewhere?
+        debug("check for item")
         if let cell = getItem() {
             move(to: cell)
             return
         }
         
         // move towards unknown fields?
+        debug("check for not visited path")
         if let cell = findNextNotVisitedPath() {
             move(to: cell)
             return
         }
         
         // found exit?
+        debug("check for exit")
         if let cell = getTheExit() {
             move(to: cell)
             return
         }
         
+        // TODO : find a solution here
+        debug("panic mode")
         print("MOVE 6 8 MOVE MOVE MOVE")
     }
 }
 
-func move(to cell: Cell) {
+func chasing() -> (Cell, String)? {
+    
+    let x = hero.position.x
+    let y = hero.position.y
+    var i = 1
+    let diagonalCells: [Cell] = [
+        board.cell(for: (x-i, y-i)),
+        board.cell(for: (x+i, y+i)),
+        board.cell(for: (x+i, y-i)),
+        board.cell(for: (x-i, y+i))
+    ].compactMap({ $0 })
+        .filter({ $0.entity.type.isChasingMonster })
+    
+    
+    if !diagonalCells.isEmpty {
+        debug("there is a diagonal enemy. Lets move back")
+        // check in which cell to move here
+        let cardinalCells: [Cell] = [
+            board.cell(for: (x-i, y)),
+            board.cell(for: (x+i, y)),
+            board.cell(for: (x, y-i)),
+            board.cell(for: (x, y+i))
+        ].compactMap { $0 }
+            .filter({ $0.entity.type.isPassable })
+        for cell in cardinalCells {
+            debug("Check safety of \(cell.position)")
+            let cx = cell.position.x
+            let cy = cell.position.y
+            // is there a monster on the cardinal edges?
+            guard [board.cell(for: (cx-1, cy-1)),
+                   board.cell(for: (cx+1, cy+1)),
+                   board.cell(for: (cx+1, cy-1)),
+                   board.cell(for: (cx-1, cy+1)),
+                   board.cell(for: (cx-1, cy)),
+                   board.cell(for: (cx+1, cy)),
+                   board.cell(for: (cx, cy-1)),
+                   board.cell(for: (cx, cy+1))]
+                .compactMap({$0})
+                .filter({ $0.entity.type.isMonster })
+                .isEmpty else {
+                debug("not safe")
+                continue
+            }
+            debug("No monster arround")
+            return (cell, "MOVE")
+        }
+    }
+    
+    
+    i = 2
+    let cardinalCells2: [Cell] = [
+        board.cell(for: (x-i, y)),
+        board.cell(for: (x+i, y)),
+        board.cell(for: (x, y-i)),
+        board.cell(for: (x, y+i))
+    ].compactMap { $0 }
+        .filter({ $0.entity.type.isChasingMonster })
+    
+    if !cardinalCells2.isEmpty {
+        debug("There is cardinal enemy 2 cells ahead")
+        // this will tell hero just to wait.
+        // enemy is chasing already
+        // but we need to check the diagonals as well,
+        // to not move in there direction
+        // obstacles in between could stop me forever
+        for cell in cardinalCells2 {
+            debug("check \(cell.position)")
+            if x > cell.position.x {
+                guard let nCell = board.cell(for: (x-1, y)), nCell.entity.type.isPassable else {
+                    continue
+                }
+            }
+            
+            if x < cell.position.x {
+                guard let nCell = board.cell(for: (x+1, y)), nCell.entity.type.isPassable else {
+                    continue
+                }
+            }
+            
+            if y > cell.position.y {
+                guard let nCell = board.cell(for: (x, y-1)), nCell.entity.type.isPassable else {
+                    continue
+                }
+            }
+            
+            if y < cell.position.y {
+                guard let nCell = board.cell(for: (x, y+1)), nCell.entity.type.isPassable else {
+                    continue
+                }
+            }
+            
+            // if we reach here, than the enemy will walk to me next turn
+            return (board.cell(for: hero.position)!, "MOVE")
+        }
+    }
+    
+    let horseMoveCells: [Cell] = [
+        board.cell(for: (x+2, y-1)),
+        board.cell(for: (x+2, y+1)),
+        board.cell(for: (x-2, y-1)),
+        board.cell(for: (x-2, y+1)),
+        board.cell(for: (x+1, y+2)),
+        board.cell(for: (x-1, y+2)),
+        board.cell(for: (x+1, y-2)),
+        board.cell(for: (x-1, y-2))
+    ].compactMap { $0 }
+        .filter({ $0.entity.type.isChasingMonster })
+    
+    if !horseMoveCells.isEmpty {
+        // the enemy is far away, but when i move to
+        // the next field it could attack me.
+        // so i wait, if its not a orc
+        
+        for cell in horseMoveCells {
+            // TODO: need to add, that x+1 and y+1 needs to be considered as well ... as box ...
+            // TODO: remove redundant code .... 
+            if x-1 > cell.position.x {
+                guard [board.cell(for: (x-1, y)),
+                       board.cell(for: (x-2, y))
+                ].compactMap({ $0 })
+                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
+                    if let skelCell = board.cell(for: (x-2, y)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
+                        if hero.bow > 0 {
+                            return (skelCell, "ATTACK 3")
+                        } else if hero.scythe > 0 {
+                            return (skelCell, "ATTACK 2")
+                        }
+                    }
+                    continue
+                }
+            }
+            if x+1 < cell.position.x {
+                guard [board.cell(for: (x+1, y)),
+                       board.cell(for: (x+2, y))
+                ].compactMap({ $0 })
+                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
+                    if let skelCell = board.cell(for: (x+2, y)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
+                        if hero.bow > 0 {
+                            return (skelCell, "ATTACK 3")
+                        } else if hero.scythe > 0 {
+                            return (skelCell, "ATTACK 2")
+                        }
+                    }
+                    continue
+                }
+            }
+            
+            if y-1 > cell.position.y {
+                guard [board.cell(for: (x, y-1)),
+                       board.cell(for: (x, y-2))
+                ].compactMap({ $0 })
+                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
+                    if let skelCell = board.cell(for: (x, y-2)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
+                        if hero.bow > 0 {
+                            return (skelCell, "ATTACK 3")
+                        } else if hero.scythe > 0 {
+                            return (skelCell, "ATTACK 2")
+                        }
+                    }
+                    continue
+                }
+            }
+            
+            if y+1 < cell.position.x {
+                guard [board.cell(for: (x, y+1)),
+                       board.cell(for: (x, y+2))
+                ].compactMap({ $0 })
+                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
+                    if let skelCell = board.cell(for: (x, y+2)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
+                        if hero.bow > 0 {
+                            return (skelCell, "ATTACK 3")
+                        } else if hero.scythe > 0 {
+                            return (skelCell, "ATTACK 2")
+                        }
+                    }
+                    continue
+                }
+            }
+            
+            // if we reach here, than the enemy will walk to me next turn
+            return (board.cell(for: hero.position)!, "MOVE")
+        }
+    }
+    
+    return nil
+}
+
+func findTarget(fromCell cell: Cell, toTarget target: Cell, maxDepth: Int, depth: Int = 0, lastCells: [Cell] = []) -> Cell? {
+
+    var checkedCells = lastCells
+    checkedCells.append(cell)
+    
+    debug("Check \(cell.position)")
+    if depth == maxDepth {
+        debug("Check cancelled ... its to far away")
+//         if let firstCell = lastCells.first {
+//            let currentDistance = distance(from: cell.position, to: target.position)
+//            let firstDistance = distance(from: firstCell.position, to: target.position)
+//            if currentDistance <= firstDistance+2 {
+//                debug("could be more near ... use it")
+//                return cell
+//            }
+//         }
+
+        return nil
+    }
+    
+    /*
+    if let firstCell = lastCells.first {
+        
+        let currentDistance = distance(from: cell.position, to: target.position)
+        let firstDistance = distance(from: firstCell.position, to: target.position)
+        
+        if currentDistance > firstDistance+5 {
+            debug("Check cancelled ... distance is increasing")
+            return nil
+        }
+    }
+    */
+    
+    let cells: [Cell] = [
+        board.cell(for: (cell.position.x-1, cell.position.y)),
+        board.cell(for: (cell.position.x+1, cell.position.y)),
+        board.cell(for: (cell.position.x, cell.position.y-1)),
+        board.cell(for: (cell.position.x, cell.position.y+1))
+    ].compactMap { $0 }
+    .filter({ $0.entity.type.isPassable })
+    .sorted { (left, right) -> Bool in
+        let ldistance = distance(from: left.position, to: target.position)
+        let rdistance = distance(from: right.position, to: target.position)
+        return ldistance < rdistance
+    }
+
+    if depth == 0 && cells.count == 1 {
+        debug("only one way to move")
+        return cells.first!
+    }
+    
+    for currentCell in cells {
+        //debug("Current Cell Check \(currentCell.position)")
+        if currentCell == target {
+            debug("found target")
+            return target
+        }
+        if lastCells.contains(where: { $0 == currentCell }) {
+            continue
+        }
+        
+        if findTarget(fromCell: currentCell, toTarget: target, maxDepth: maxDepth, depth: depth+1, lastCells: checkedCells) != nil {
+            return currentCell
+        } else {
+            continue
+        }
+    }
+
+    return nil
+}
+
+func move(to cell: Cell) -> Bool {
     debug("Target: \(cell.position.x) - \(cell.position.y)")
     let td = distance(from: hero.position, to: cell.position)
     debug("Distance: \(td)")
     
-    if td > 2 {
-        var cells: [Cell] = []
+    if td >= 8 {
+        return false
+    }
+    
+    if td > 1 {
         
-        // find the real path to cell
-//        for x in hero.position.x-1...hero.position.x+1 {
-//            for y in hero.position.y-1...hero.position.y+1 {
-//                guard let cell = board.cell(for: (x, y)) else {
-//                    continue
-//                }
-//                cells.append(cell)
-//            }
-//        }
-        
-        for x in hero.position.x-1...hero.position.x+1 {
-            for y in hero.position.y-1...hero.position.y+1 {
-                guard let cell = board.cell(for: (x, y)) else {
-                    continue
-                }
-                cells.append(cell)
-            }
+        guard let targetCell = findTarget(fromCell: board.cell(for: hero.position)!, toTarget: cell, maxDepth: 10) else {
+            return false
         }
-        
-        let sCells = cells.sorted { (left, right) -> Bool in
-            let ldistance = distance(from: left.position, to: cell.position)
-            let rdistance = distance(from: right.position, to: cell.position)
-            return ldistance < rdistance
-        }
-
-        let targetCell = sCells.first(where: { $0.entity.type != .obstacle && $0.entity.type != .exit })!
         print("MOVE \(targetCell.position.x) \(targetCell.position.y) Lets move to \(targetCell.entity.type.name)")
-
-        
     } else {
         print("MOVE \(cell.position.x) \(cell.position.y) Lets move to \(cell.entity.type.name)")
     }
+    
+    return true
+    
 }
 //
 //
@@ -631,21 +869,22 @@ func distance(from fromPosition: Position, to toPosition: Position) -> Int {
 // when enemy is walking to hero and next step would be diagonal pos
 // remember this and move away until he is in cardinal direction
 
-func getPotion() -> Cell? {
-    let potions = board.cells.filter({ $0.entity.type == .potion })
-    let sPotions = potions.sorted { (left, right) -> Bool in
-        let ldistance = distance(from: left.position, to: hero.position)
-        let rdistance = distance(from: right.position, to: hero.position)
-        return ldistance < rdistance
-    }
-    
-    return sPotions.first
-}
+//func getPotion() -> Cell? {
+//    let potions = board.cells.filter({ $0.entity.type == .potion })
+//    let sPotions = potions.sorted { (left, right) -> Bool in
+//        let ldistance = distance(from: left.position, to: hero.position)
+//        let rdistance = distance(from: right.position, to: hero.position)
+//        return ldistance < rdistance
+//    }
+//
+//    return sPotions.first
+//}
 
 func getItem() -> Cell? {
-    let i = 1
     let x = hero.position.x
     let y = hero.position.y
+    let i = 1
+    
     let cells: [Cell] = [
         board.cell(for: (x-i, y)),
         board.cell(for: (x+i, y)),
@@ -656,40 +895,47 @@ func getItem() -> Cell? {
         board.cell(for: (x+i, y-i)),
         board.cell(for: (x-i, y+i))
     ].compactMap { $0 }
+    
     return cells.first(where: { $0.entity.type.isItem })
+    
 }
 
 func getTheExit() -> Cell? {
     return board.exit
 }
 
-
 func findNextNotVisitedPath() -> Cell? {
+    
+//   let sortedCells = board.cells
+//        .filter({ $0.entity.type.isPassable })
+//        .sorted { (left, right) -> Bool in
+//            let ldistance = distance(from: left.position, to: hero.position)
+//            let rdistance = distance(from: right.position, to: hero.position)
+//            return ldistance < rdistance
+//        }
+//
+//    return sortedCells.first(where: { cell in
+//        return !board.visitedCells.contains(where: { $0 == cell })
+//    })
+    
     let x = hero.position.x
     let y = hero.position.y
-    for i in 1...16 {
-        let cells: [Cell] = [
-            board.cell(for: (x-i, y)),
-            board.cell(for: (x+i, y)),
-            board.cell(for: (x, y-i)),
-            board.cell(for: (x, y+i)),
-            board.cell(for: (x-i, y-i)),
-            board.cell(for: (x+i, y+i)),
-            board.cell(for: (x+i, y-i)),
-            board.cell(for: (x-i, y+i))
-        ].compactMap { $0 }
-        guard let cell = cells.first(where: { cell1 in
-            return cell1.entity.type == .path && !board.visitedCells.contains(where: { cell in
-                return cell == cell1
-            })
-        }) else {
-            continue
-        }
-        
-        return cell
-    }
+    let i = 1
     
-    return nil
+    let cells: [Cell] = [
+        board.cell(for: (x-i, y)),
+        board.cell(for: (x+i, y)),
+        board.cell(for: (x, y-i)),
+        board.cell(for: (x, y+i)),
+        board.cell(for: (x-i, y-i)),
+        board.cell(for: (x+i, y+i)),
+        board.cell(for: (x+i, y-i)),
+        board.cell(for: (x-i, y+i))
+    ].compactMap { $0 }
+    
+    return cells.first(where: { cell in
+        return cell.entity.type.isPassable && !board.visitedCells.contains(where: { $0 == cell })
+    })
 }
 
 
@@ -705,12 +951,26 @@ func canAttackWithSword() -> Cell? {
     return cells.first(where: { $0.entity.type.isAttackable })
 }
 
+func canAttackWithSwordNoBox() -> Cell? {
+    let cells: [Cell] = [
+        board.cell(for: (hero.position.x-1, hero.position.y)),
+        board.cell(for: (hero.position.x+1, hero.position.y)),
+        board.cell(for: (hero.position.x, hero.position.y-1)),
+        board.cell(for: (hero.position.x, hero.position.y+1))
+    ].compactMap { $0 }
+    
+    
+    guard let cell = cells.first(where: { $0.entity.type.isMonster }) else {
+        return cells.first(where: { $0.entity.type == .box })
+    }
+    
+    return cell
+}
+
 func canAttackWithScythe() -> Cell? {
     guard hero.scythe > 0 else {
         return nil
     }
-    
-    
     
     for x in hero.position.x-1...hero.position.x+1 {
         for y in hero.position.y-1...hero.position.y+1 {
@@ -734,7 +994,7 @@ func canAttackWithScythe() -> Cell? {
         board.cell(for: (hero.position.x+2, hero.position.y-2))
     ].compactMap { $0 }
     
-    return cells.first(where: { $0.entity.type.isAttackable })
+    return cells.first(where: { $0.entity.type.isAttackable && $0.entity.type != .box })
 }
 
 func canAttackWithHammer() -> Cell? {
@@ -765,9 +1025,7 @@ func canAttackWithBow() -> Cell? {
     for x in hero.position.x-3...hero.position.x+3 {
         for y in hero.position.y-3...hero.position.y+3 {
             guard let cell = board.cell(for: (x, y)),
-                  cell.entity.type.isAttackable,
-                  cell.entity.value <= Weapon.bow.damage,
-                  cell.entity.type != .box else {
+                  cell.entity.type == .orc else {
                 continue
             }
             return cell
@@ -776,3 +1034,4 @@ func canAttackWithBow() -> Cell? {
     
     return nil
 }
+

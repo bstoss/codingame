@@ -418,6 +418,7 @@ var hero = Hero(position: (-1,-1))
 var board = Board(h: 12, w: 16)
 var loop = true
 var turn = 0
+var steps: [Cell] = []
 
 // game loop
 while loop {
@@ -451,7 +452,7 @@ while loop {
         }
     }
     board.setEntity(forPosition: hero.position, entity: Entity(type: .hero))
-    board.printBoard()
+    // board.printBoard()
     
     DecissionMaker.makeDecission()
     
@@ -474,8 +475,11 @@ struct DecissionMaker {
         
         debug("check for exit if turn gets near end")
         if let exit = board.exit, turn >= 120 {
-            move(to: exit)
-            return
+            if move(to: exit) {
+                return
+            } else {
+                debug("exit is to far away ... damn")
+            }
         }
         
         debug("check for attack")
@@ -532,38 +536,39 @@ struct DecissionMaker {
     
     static func makeMove() {
         
-//        if let cell = getPotion(), hero.health <= 15 {
-//            debug("need potion")
-//            if move(to: cell) {
-//                return
-//            }
-//            debug("potion to far away")
-//        }
-        
         // treasure somewhere?
         debug("check for item")
         if let cell = getItem() {
-            move(to: cell)
-            return
+            if move(to: cell) {
+                return
+            }
         }
         
         // move towards unknown fields?
         debug("check for not visited path")
         if let cell = findNextNotVisitedPath() {
-            move(to: cell)
-            return
+            if move(to: cell) {
+                return
+            }
         }
         
         // found exit?
         debug("check for exit")
-        if let cell = getTheExit() {
-            move(to: cell)
-            return
+        if turn < 120 {
+            if let cell = getTheExit() {
+                if move(to: cell) {
+                    return
+                }
+            }
         }
         
         // TODO : find a solution here
+        // step back seems to be ok.
+        // would be more happy, to walk through exit here
+        // if exit is to far away
         debug("panic mode")
-        print("MOVE 6 8 MOVE MOVE MOVE")
+        let cell = steps.removeLast()
+        print("MOVE \(cell.position.x) \(cell.position.y) Let's move back ... cannot risk timeout again.")
     }
 }
 
@@ -680,9 +685,17 @@ func chasing() -> (Cell, String)? {
         // the next field it could attack me.
         // so i wait, if its not a orc
         
+        // seed=-3245625472022538000
+        // has issue with horse move
+        
+        // --h
+        // v
+        
+        // wenn wait, check if bow or scythe attack es needed!!!
+        
         for cell in horseMoveCells {
             // TODO: need to add, that x+1 and y+1 needs to be considered as well ... as box ...
-            // TODO: remove redundant code .... 
+            // TODO: remove redundant code ....
             if x-1 > cell.position.x {
                 guard [board.cell(for: (x-1, y)),
                        board.cell(for: (x-2, y))
@@ -730,7 +743,7 @@ func chasing() -> (Cell, String)? {
                 }
             }
             
-            if y+1 < cell.position.x {
+            if y+1 < cell.position.y {
                 guard [board.cell(for: (x, y+1)),
                        board.cell(for: (x, y+2))
                 ].compactMap({ $0 })
@@ -754,98 +767,67 @@ func chasing() -> (Cell, String)? {
     return nil
 }
 
-func findTarget(fromCell cell: Cell, toTarget target: Cell, maxDepth: Int, depth: Int = 0, lastCells: [Cell] = []) -> Cell? {
-
+func findNext(cell: Cell, condition: ((Cell) -> Bool), depth: Int = 0, maxDepth: Int, lastCells: [Cell] = []) -> (Cell, Int)? {
+    //debug("findNext - START CHECK CELL: \(cell.position) - \(depth)")
+    
     var checkedCells = lastCells
     checkedCells.append(cell)
     
-    debug("Check \(cell.position)")
-    if depth == maxDepth {
-        debug("Check cancelled ... its to far away")
-//         if let firstCell = lastCells.first {
-//            let currentDistance = distance(from: cell.position, to: target.position)
-//            let firstDistance = distance(from: firstCell.position, to: target.position)
-//            if currentDistance <= firstDistance+2 {
-//                debug("could be more near ... use it")
-//                return cell
-//            }
-//         }
-
-        return nil
-    }
+    var mutableMaxDepth = maxDepth
     
-    /*
-    if let firstCell = lastCells.first {
-        
-        let currentDistance = distance(from: cell.position, to: target.position)
-        let firstDistance = distance(from: firstCell.position, to: target.position)
-        
-        if currentDistance > firstDistance+5 {
-            debug("Check cancelled ... distance is increasing")
-            return nil
-        }
-    }
-    */
+    let x = cell.position.x
+    let y = cell.position.y
     
-    let cells: [Cell] = [
-        board.cell(for: (cell.position.x-1, cell.position.y)),
-        board.cell(for: (cell.position.x+1, cell.position.y)),
-        board.cell(for: (cell.position.x, cell.position.y-1)),
-        board.cell(for: (cell.position.x, cell.position.y+1))
+    let cardinalCells =  [
+        board.cell(for: (x-1, y)),
+        board.cell(for: (x+1, y)),
+        board.cell(for: (x, y-1)),
+        board.cell(for: (x, y+1))
     ].compactMap { $0 }
-    .filter({ $0.entity.type.isPassable })
-    .sorted { (left, right) -> Bool in
-        let ldistance = distance(from: left.position, to: target.position)
-        let rdistance = distance(from: right.position, to: target.position)
-        return ldistance < rdistance
-    }
-
-    if depth == 0 && cells.count == 1 {
-        debug("only one way to move")
-        return cells.first!
-    }
+        .filter({ $0.entity.type.isPassable })
     
-    for currentCell in cells {
-        //debug("Current Cell Check \(currentCell.position)")
-        if currentCell == target {
-            debug("found target")
-            return target
-        }
-        if lastCells.contains(where: { $0 == currentCell }) {
-            continue
+    if let cell = cardinalCells.first(where: condition) {
+       // debug("findNext direct - Found cell that met condition: \(cell.position) - \(depth)")
+        return (cell, depth)
+    } else if depth <= maxDepth {
+        var foundCells: [(Cell, Int)] = []
+        
+        for cell in cardinalCells {
+            //debug("Current Cell Check \(currentCell.position)")
+           
+            if lastCells.contains(where: { $0 == cell }) {
+                continue
+            }
+            
+            if let found = findNext(cell: cell, condition: condition, depth: depth+1, maxDepth: mutableMaxDepth, lastCells: checkedCells) {
+               // debug("findNext loop - Found cell that met condition - NextWay: \(cell.position) - \(depth)")
+                foundCells.append((cell, found.1))
+                if found.1 < mutableMaxDepth {
+                    mutableMaxDepth = found.1
+                }
+            } else {
+                continue
+            }
         }
         
-        if findTarget(fromCell: currentCell, toTarget: target, maxDepth: maxDepth, depth: depth+1, lastCells: checkedCells) != nil {
-            return currentCell
-        } else {
-            continue
-        }
+        return foundCells.sorted(by: { $0.1 < $1.1 }).first
     }
-
+    
     return nil
 }
 
 func move(to cell: Cell) -> Bool {
-    debug("Target: \(cell.position.x) - \(cell.position.y)")
-    let td = distance(from: hero.position, to: cell.position)
-    debug("Distance: \(td)")
     
-    if td >= 8 {
+    let heroCell = board.cell(for: hero.position)!
+    let condition: ((Cell) -> Bool) = { $0 == cell }
+
+    guard let foundCell = findNext(cell: heroCell, condition: condition, maxDepth: 10, lastCells: [])?.0 else {
         return false
     }
     
-    if td > 1 {
-        
-        guard let targetCell = findTarget(fromCell: board.cell(for: hero.position)!, toTarget: cell, maxDepth: 10) else {
-            return false
-        }
-        print("MOVE \(targetCell.position.x) \(targetCell.position.y) Lets move to \(targetCell.entity.type.name)")
-    } else {
-        print("MOVE \(cell.position.x) \(cell.position.y) Lets move to \(cell.entity.type.name)")
-    }
-    
+    print("MOVE \(foundCell.position.x) \(foundCell.position.y) Lets move to \(foundCell.entity.type.name)")
+    steps.append(foundCell)
     return true
-    
 }
 //
 //
@@ -881,23 +863,14 @@ func distance(from fromPosition: Position, to toPosition: Position) -> Int {
 //}
 
 func getItem() -> Cell? {
-    let x = hero.position.x
-    let y = hero.position.y
-    let i = 1
+    let heroCell = board.cell(for: hero.position)!
+    let condition: ((Cell) -> Bool) = { $0.entity.type.isItem }
+
+    guard let found = findNext(cell: heroCell, condition: condition, maxDepth: 5, lastCells: []) else {
+        return nil
+    }
     
-    let cells: [Cell] = [
-        board.cell(for: (x-i, y)),
-        board.cell(for: (x+i, y)),
-        board.cell(for: (x, y-i)),
-        board.cell(for: (x, y+i)),
-        board.cell(for: (x-i, y-i)),
-        board.cell(for: (x+i, y+i)),
-        board.cell(for: (x+i, y-i)),
-        board.cell(for: (x-i, y+i))
-    ].compactMap { $0 }
-    
-    return cells.first(where: { $0.entity.type.isItem })
-    
+    return found.0
 }
 
 func getTheExit() -> Cell? {
@@ -906,39 +879,21 @@ func getTheExit() -> Cell? {
 
 func findNextNotVisitedPath() -> Cell? {
     
-//   let sortedCells = board.cells
-//        .filter({ $0.entity.type.isPassable })
-//        .sorted { (left, right) -> Bool in
-//            let ldistance = distance(from: left.position, to: hero.position)
-//            let rdistance = distance(from: right.position, to: hero.position)
-//            return ldistance < rdistance
-//        }
-//
-//    return sortedCells.first(where: { cell in
-//        return !board.visitedCells.contains(where: { $0 == cell })
-//    })
+    let heroCell = board.cell(for: hero.position)!
+    let condition: ((Cell) -> Bool ) = { cell in
+        return !board.visitedCells.contains(where: { $0 == cell })
+    }
     
-    let x = hero.position.x
-    let y = hero.position.y
-    let i = 1
+    // TODO: i could add a check, that when target was found, i check if there items arround
+    // if cells already known.
+    // this could save unneded steps
     
-    let cells: [Cell] = [
-        board.cell(for: (x-i, y)),
-        board.cell(for: (x+i, y)),
-        board.cell(for: (x, y-i)),
-        board.cell(for: (x, y+i)),
-        board.cell(for: (x-i, y-i)),
-        board.cell(for: (x+i, y+i)),
-        board.cell(for: (x+i, y-i)),
-        board.cell(for: (x-i, y+i))
-    ].compactMap { $0 }
+    guard let found = findNext(cell: heroCell, condition: condition, maxDepth: 5, lastCells: []) else {
+        return nil
+    }
     
-    return cells.first(where: { cell in
-        return cell.entity.type.isPassable && !board.visitedCells.contains(where: { $0 == cell })
-    })
+    return found.0
 }
-
-
 
 func canAttackWithSword() -> Cell? {
     let cells: [Cell] = [

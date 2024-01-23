@@ -135,7 +135,7 @@ enum EntityType: Int {
     var isAttackable: Bool {
         switch self {
         case .box, .skeleton, .gargoyle,
-            .orc, .vampire:
+                .orc, .vampire:
             return true
         default:
             return false
@@ -145,7 +145,7 @@ enum EntityType: Int {
     var isMonster: Bool {
         switch self {
         case .skeleton, .gargoyle,
-            .orc, .vampire:
+                .orc, .vampire:
             return true
         default:
             return false
@@ -393,7 +393,7 @@ struct Board {
     func cell(for position: Position) -> Cell? {
         return g[position.y]?[position.x]
     }
-
+    
     func printBoard() {
         
         for i in 0..<h {
@@ -408,7 +408,7 @@ struct Board {
             debug(print)
         }
     }
-
+    
     
 }
 
@@ -491,19 +491,19 @@ struct DecissionMaker {
     }
     
     
-//sword: 10 damage
-//Applies damage to one cell that is a step away (in cardinal direction) from the hero.
-//hammer: 6 damage
-//Applies damage to three cells in range 1. If the given target is diagonal, the attack also hits the closest neighbours in the two adjacent cardinal directions from the hero. If the target is in a cardinal direction, it also hits the closest neighbouring cells in the two diagonal adjacent directions.
-//scythe: 7 damage
-//A target can be any cell in the chess queen move pattern limited to distance 2. The attack applies damage to the two cells covered by a queen move pattern containing the given target cell.
-//bow: 8 damage
-//Applies damage to any single cell visible by the hero (which is in range ≤ 3).
-
+    //sword: 10 damage
+    //Applies damage to one cell that is a step away (in cardinal direction) from the hero.
+    //hammer: 6 damage
+    //Applies damage to three cells in range 1. If the given target is diagonal, the attack also hits the closest neighbours in the two adjacent cardinal directions from the hero. If the target is in a cardinal direction, it also hits the closest neighbouring cells in the two diagonal adjacent directions.
+    //scythe: 7 damage
+    //A target can be any cell in the chess queen move pattern limited to distance 2. The attack applies damage to the two cells covered by a queen move pattern containing the given target cell.
+    //bow: 8 damage
+    //Applies damage to any single cell visible by the hero (which is in range ≤ 3).
+    
     
     static func shouldAttack() -> Bool {
         // 0 for sword, 1 for hammer, 2 for scythe, and 3 for bow.
-
+        
         
         if hero.health < 8 {
             debug("check for exit")
@@ -596,28 +596,42 @@ func chasing() -> (Cell, String)? {
             board.cell(for: (x, y+i))
         ].compactMap { $0 }
             .filter({ $0.entity.type.isPassable })
+        
+        var freeCells: [Cell] = []
+        var possibleBoxCells: [Cell] = []
+        
         for cell in cardinalCells {
             debug("Check safety of \(cell.position)")
             let cx = cell.position.x
             let cy = cell.position.y
             // is there a monster on the cardinal edges?
-            guard [board.cell(for: (cx-1, cy-1)),
-                   board.cell(for: (cx+1, cy+1)),
-                   board.cell(for: (cx+1, cy-1)),
-                   board.cell(for: (cx-1, cy+1)),
-                   board.cell(for: (cx-1, cy)),
-                   board.cell(for: (cx+1, cy)),
-                   board.cell(for: (cx, cy-1)),
-                   board.cell(for: (cx, cy+1))]
+            
+            let cells = [board.cell(for: (cx-1, cy-1)),
+                         board.cell(for: (cx+1, cy+1)),
+                         board.cell(for: (cx+1, cy-1)),
+                         board.cell(for: (cx-1, cy+1)),
+                         board.cell(for: (cx-1, cy)),
+                         board.cell(for: (cx+1, cy)),
+                         board.cell(for: (cx, cy-1)),
+                         board.cell(for: (cx, cy+1))]
                 .compactMap({$0})
-                .filter({ $0.entity.type.isMonster })
-                .isEmpty else {
-                debug("not safe")
-                continue
+            
+            if !cells.contains(where: { $0.entity.type.isMonster || $0.entity.type == .box }) {
+                freeCells.append(cell)
+            } else if !cells.contains(where: { $0.entity.type.isMonster }) {
+                possibleBoxCells.append(cell)
             }
-            debug("No monster arround")
+        }
+        
+        if let cell = freeCells.first {
             return (cell, "MOVE")
         }
+        
+        if let cell = possibleBoxCells.first {
+            return (cell, "MOVE")
+        }
+        
+        return nil
     }
     
     
@@ -663,6 +677,15 @@ func chasing() -> (Cell, String)? {
                 }
             }
             
+            if cell.entity.value > 10 {
+                if hero.scythe > 0 {
+                    return (cell, "ATTACK 2")
+                }
+                if hero.bow > 0 {
+                    return (cell, "ATTACK 3")
+                }
+            }
+            
             // if we reach here, than the enemy will walk to me next turn
             return (board.cell(for: hero.position)!, "MOVE")
         }
@@ -694,69 +717,79 @@ func chasing() -> (Cell, String)? {
         // wenn wait, check if bow or scythe attack es needed!!!
         
         for cell in horseMoveCells {
-            // TODO: need to add, that x+1 and y+1 needs to be considered as well ... as box ...
-            // TODO: remove redundant code ....
+            debug("HORSE CELL: \(cell.position)")
+            
+            // if horseMove is on the left
             if x-1 > cell.position.x {
-                guard [board.cell(for: (x-1, y)),
-                       board.cell(for: (x-2, y))
-                ].compactMap({ $0 })
-                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
-                    if let skelCell = board.cell(for: (x-2, y)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
-                        if hero.bow > 0 {
-                            return (skelCell, "ATTACK 3")
-                        } else if hero.scythe > 0 {
-                            return (skelCell, "ATTACK 2")
-                        }
+                if y > cell.position.y {
+                    debug("LEFT TOP HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x-1, y), position2: (x-2, y), position3: (x-1, y-1)) else {
+                        continue
                     }
-                    continue
+                    return action
+                } else {
+                    debug("LEFT BOTTOM HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x-1, y), position2: (x-2, y), position3: (x-1, y+1)) else {
+                        continue
+                    }
+                    return action
                 }
             }
+            
+            // if horseMove is on the right
             if x+1 < cell.position.x {
-                guard [board.cell(for: (x+1, y)),
-                       board.cell(for: (x+2, y))
-                ].compactMap({ $0 })
-                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
-                    if let skelCell = board.cell(for: (x+2, y)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
-                        if hero.bow > 0 {
-                            return (skelCell, "ATTACK 3")
-                        } else if hero.scythe > 0 {
-                            return (skelCell, "ATTACK 2")
-                        }
+                if y > cell.position.y {
+                    debug("RIGHT TOP HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x+1, y), position2: (x+2,y), position3: (x+1, y-1)) else {
+                        continue
                     }
-                    continue
+                    return action
+                } else {
+                    debug("RIGHT BOTTOM HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x+1, y), position2: (x+2,y), position3: (x+1, y+1)) else {
+                        continue
+                    }
+                    return action
                 }
+                
             }
             
+            // if horseMove is on the top
             if y-1 > cell.position.y {
-                guard [board.cell(for: (x, y-1)),
-                       board.cell(for: (x, y-2))
-                ].compactMap({ $0 })
-                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
-                    if let skelCell = board.cell(for: (x, y-2)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
-                        if hero.bow > 0 {
-                            return (skelCell, "ATTACK 3")
-                        } else if hero.scythe > 0 {
-                            return (skelCell, "ATTACK 2")
-                        }
+                
+                if x > cell.position.x {
+                    debug("TOP LEFT HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x, y-1), position2: (x,y-2), position3: (x-1, y-1)) else {
+                        continue
                     }
-                    continue
+                    return action
+                } else {
+                    debug("TOP RIGHT HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x, y-1), position2: (x,y-2), position3: (x+1, y-1)) else {
+                        continue
+                    }
+                    return action
                 }
+                
             }
             
+            // if horseMove is at the bottom
             if y+1 < cell.position.y {
-                guard [board.cell(for: (x, y+1)),
-                       board.cell(for: (x, y+2))
-                ].compactMap({ $0 })
-                    .filter({ $0.entity.type.isPassableHorseMove }).count == 2 else {
-                    if let skelCell = board.cell(for: (x, y+2)), (skelCell.entity.type == .skeleton || skelCell.entity.type == .box) {
-                        if hero.bow > 0 {
-                            return (skelCell, "ATTACK 3")
-                        } else if hero.scythe > 0 {
-                            return (skelCell, "ATTACK 2")
-                        }
+                
+                if x > cell.position.x {
+                    debug("BOTTOM LEFT HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x, y+1), position2: (x,y+2), position3: (x-1, y+1)) else {
+                        continue
                     }
-                    continue
+                    return action
+                } else {
+                    debug("BOTTOM RIGHT HORSE MOVE")
+                    guard let action = horseMoveCheck(position1: (x, y+1), position2: (x,y+2), position3: (x+1, y+1)) else {
+                        continue
+                    }
+                    return action
                 }
+                
             }
             
             // if we reach here, than the enemy will walk to me next turn
@@ -764,6 +797,82 @@ func chasing() -> (Cell, String)? {
         }
     }
     
+    return nil
+}
+
+func horseMoveCheck(position1: Position, position2: Position, position3: Position) -> (Cell, String)? {
+    
+    // one step in front
+    let cell1 = board.cell(for: (position1.x, position1.y))
+    
+    // two steps in front
+    let cell2 = board.cell(for: (position2.x, position2.y))
+    
+    // the direct diagonal cell of horsemove
+    let diagonalCell = board.cell(for: (position3.x, position3.y))
+    
+    if let cell = diagonalCell,
+       (cell.entity.type == .skeleton ||
+        cell.entity.type == .box ||
+        cell.entity.type == .orc) {
+        if hero.hammer > 0 {
+            return (cell, "ATTACK 1")
+        }
+        if hero.scythe > 0 {
+            return (cell, "ATTACK 2")
+        }
+        if hero.bow > 0 {
+            return (cell, "ATTACK 3")
+        }
+    }
+    
+    if let cell = cell2,
+       (cell.entity.type == .skeleton ||
+        cell.entity.type == .box ||
+        cell.entity.type == .orc ||
+        cell.entity.value > 10 ) {
+        if hero.scythe > 0 {
+            return (cell, "ATTACK 2")
+        }
+        if hero.bow > 0 {
+            return (cell, "ATTACK 3")
+        }
+    }
+    
+    let cells = [
+        cell1,
+        cell2
+    ].compactMap({ $0 })
+    
+    let cellsInFront = [
+        cell1,
+        diagonalCell
+    ].compactMap({ $0 })
+    
+    if cells.filter({ $0.entity.type.isPassableHorseMove }).count == 2 ||
+        cellsInFront.contains(where: { $0.entity.type.isPassableHorseMove }){
+        
+        debug("STAY")
+        return (board.cell(for: hero.position)!, "MOVE")
+    }
+    
+    
+    if let cell = board.cell(for: (position1.x, position1.y)),
+       (cell.entity.type == .skeleton || cell.entity.type == .box || cell.entity.type == .box) {
+        if hero.hammer > 0 {
+            return (cell, "ATTACK 1")
+        }
+        if hero.scythe > 0 {
+            return (cell, "ATTACK 2")
+        }
+        if hero.bow > 0 {
+            return (cell, "ATTACK 3")
+        }
+    }
+    
+    
+    
+    debug("SKIP")
     return nil
 }
 
@@ -787,20 +896,20 @@ func findNext(cell: Cell, condition: ((Cell) -> Bool), depth: Int = 0, maxDepth:
         .filter({ $0.entity.type.isPassable })
     
     if let cell = cardinalCells.first(where: condition) {
-       // debug("findNext direct - Found cell that met condition: \(cell.position) - \(depth)")
+        // debug("findNext direct - Found cell that met condition: \(cell.position) - \(depth)")
         return (cell, depth)
     } else if depth <= maxDepth {
         var foundCells: [(Cell, Int)] = []
         
         for cell in cardinalCells {
             //debug("Current Cell Check \(currentCell.position)")
-           
+            
             if lastCells.contains(where: { $0 == cell }) {
                 continue
             }
             
             if let found = findNext(cell: cell, condition: condition, depth: depth+1, maxDepth: mutableMaxDepth, lastCells: checkedCells) {
-               // debug("findNext loop - Found cell that met condition - NextWay: \(cell.position) - \(depth)")
+                // debug("findNext loop - Found cell that met condition - NextWay: \(cell.position) - \(depth)")
                 foundCells.append((cell, found.1))
                 if found.1 < mutableMaxDepth {
                     mutableMaxDepth = found.1
@@ -820,7 +929,7 @@ func move(to cell: Cell) -> Bool {
     
     let heroCell = board.cell(for: hero.position)!
     let condition: ((Cell) -> Bool) = { $0 == cell }
-
+    
     guard let foundCell = findNext(cell: heroCell, condition: condition, maxDepth: 10, lastCells: [])?.0 else {
         return false
     }
@@ -865,7 +974,7 @@ func distance(from fromPosition: Position, to toPosition: Position) -> Int {
 func getItem() -> Cell? {
     let heroCell = board.cell(for: hero.position)!
     let condition: ((Cell) -> Bool) = { $0.entity.type.isItem }
-
+    
     guard let found = findNext(cell: heroCell, condition: condition, maxDepth: 5, lastCells: []) else {
         return nil
     }
@@ -949,14 +1058,14 @@ func canAttackWithScythe() -> Cell? {
         board.cell(for: (hero.position.x+2, hero.position.y-2))
     ].compactMap { $0 }
     
-    return cells.first(where: { $0.entity.type.isAttackable && $0.entity.type != .box })
+    return cells.first(where: { $0.entity.type == .orc })
 }
 
 func canAttackWithHammer() -> Cell? {
     guard hero.hammer > 0 else {
         return nil
     }
-        
+    
     for x in hero.position.x-1...hero.position.x+1 {
         for y in hero.position.y-1...hero.position.y+1 {
             guard let cell = board.cell(for: (x, y)),

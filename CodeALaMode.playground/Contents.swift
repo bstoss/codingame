@@ -31,8 +31,16 @@ var input = [
     "#.#..I.0#.#",
     "#.##.####.#",
     "#.........#",
-    "B####W#####"
-
+    "B####W#####",
+    "199",
+    "7 3 DISH-ICE_CREAM",
+    "9 1 NONE",
+    "0",
+    "NONE 0",
+    "3",
+    "DISH-BLUEBERRIES-ICE_CREAM 650",
+    "DISH-BLUEBERRIES-ICE_CREAM 650",
+    "DISH-ICE_CREAM-BLUEBERRIES 650"
 ]
 
 func readLine() -> String? {
@@ -75,9 +83,6 @@ func read() -> String {
 
 typealias Position = (x: Int, y: Int)
 
-protocol Entity {
-    var print: String { get }
-}
 /*
  .: walkable cell
  0: first player spawn location (also walkable)
@@ -87,11 +92,11 @@ protocol Entity {
  B: the blueberry crate
  I: the ice cream crate
  */
-enum CellType: String, Entity {
+enum Entity: String {
     case emptyTable = "#"
     case walkable = "."
-    case sp1 = "0"
-    case sp2 = "1"
+    case p1 = "0"
+    case p2 = "1"
     case dishwasher = "D"
     case window = "W"
     case blueberry = "B"
@@ -102,10 +107,16 @@ enum CellType: String, Entity {
     }
 }
 
-enum Tabables: String {
+enum Item: String {
     case dish = "DISH"
     case blueberries = "BLUEBERRIES"
     case iceCream = "ICE_CREAM"
+    
+    static func makeItems(withIngrediences ingrediences: String) -> [Item] {
+        return ingrediences.split(separator: "-").compactMap { itemChar in
+            Item(rawValue: String(itemChar))
+        }
+    }
 }
 
 class Cell {
@@ -129,11 +140,18 @@ class Board {
     
     // need 2 dimensions because of faster access
     var g: Grid = [:]
-    
     var cells: [Cell] = []
-    var visitedCells: [Cell] = []
     
-    var exit: Cell?
+    var p1: Cell!
+    var p2: Cell!
+    var d: Cell!
+    var w: Cell!
+    var b: Cell!
+    var i: Cell!
+    
+    //var visitedCells: [Cell] = []
+    
+    //var exit: Cell?
     // store fix positions?
     // dish, food, bell?
     
@@ -148,33 +166,31 @@ class Board {
         var rowIndex = g.count // actually new index
         var cellIndex = 0
         for char in rowString {
-            let type = CellType(rawValue: String(char))!
+            let type = Entity(rawValue: String(char))!
             let cell = Cell(position: (cellIndex, rowIndex), entity: type)
             row[cellIndex] = cell
             cells.append(cell)
+            switch type {
+            case .p1:
+                p1 = cell
+            case .p2:
+                p2 = cell
+            case .dishwasher:
+                d = cell
+            case .window:
+                w = cell
+            case .blueberry:
+                b = cell
+            case .iceCream:
+                i = cell
+            default: ()
+            }
+           
             cellIndex += 1
         }
         
         g[rowIndex] = row
     }
-    
-//    mutating func setup() {
-//
-//        for i in 0..<h {
-//            var row: Row = [:]
-//            for j in 0..<w {
-//                let cell = Cell(position: (j,i), entity: Entity())
-//                row[j] = cell
-//                cells.append(cell)
-////                if let ent = g[i]?[j], ent.type == .visited {
-////                    row[j] = ent
-////                } else {
-////                    row[j] = Entity(position: (j, i))
-////                }
-//            }
-//            g[i] = row
-//        }
-//    }
     
 //    mutating func setEntity(forPosition position: Position, entity: Entity) {
 //        g[position.y]?[position.x]?.entity = entity
@@ -223,6 +239,30 @@ class Board {
     }
 }
 
+class Player {
+    var position: Position
+    var wearing: Dish?
+    
+    init(position: Position, item: String) {
+        self.position = position
+        self.wearing = Dish.make(fromItem: item)
+    }
+}
+
+struct Dish {
+    var ingrediences: [Item]
+    
+    init(ingrediences: String) {
+        self.ingrediences = Item.makeItems(withIngrediences: ingrediences)
+    }
+    
+    static func make(fromItem item: String) -> Dish? {
+        guard item != "NONE" else {
+            return nil
+        }
+        return Dish(ingrediences: item)
+    }
+}
 
 
 let numAllCustomers = Int(read())!
@@ -238,20 +278,31 @@ var board = Board()
 for _ in 0...6 {
     board.addRow(rowString: read())
 }
+var player1 = Player(position: board.p1.position, item: "NONE")
+var player2 = Player(position: board.p2.position, item: "NONE")
 
 board.printBoard()
 
 // game loop
 while loop() {
     let turnsRemaining = Int(read())!
+    
+    // p1
     let inputs = (read()).split(separator: " ").map(String.init)
     let playerX = Int(inputs[0])!
     let playerY = Int(inputs[1])!
     let playerItem = inputs[2]
+    player1.position = (playerX, playerY)
+    player1.wearing = Dish.make(fromItem: playerItem)
+    
+    // p2
     let inputs2 = (read()).split(separator: " ").map(String.init)
     let partnerX = Int(inputs2[0])!
     let partnerY = Int(inputs2[1])!
     let partnerItem = inputs2[2]
+    player2.position = (partnerX, partnerY)
+    player2.wearing = Dish.make(fromItem: partnerItem)
+    
     let numTablesWithItems = Int(read())! // the number of tables in the kitchen that currently hold an item
     if numTablesWithItems > 0 {
         for i in 0...(numTablesWithItems-1) {
@@ -261,9 +312,12 @@ while loop() {
             let item = inputs[2]
         }
     }
+    
     let inputs3 = (read()).split(separator: " ").map(String.init)
     let ovenContents = inputs3[0] // ignore until wood 1 league
     let ovenTimer = Int(inputs3[1])!
+    
+    
     let numCustomers = Int(read())! // the number of customers currently waiting for food
     if numCustomers > 0 {
         for i in 0...(numCustomers-1) {
@@ -281,15 +335,70 @@ while loop() {
     // USE x y
     // WAIT
    // print("WAIT")
+    let printOut = decideAction()
+    
+    print(printOut)
+    
+    
+}
 
-    if playerItem == "NONE" {
-        print("USE 5 0")
-    } else if playerItem == "DISH" {
-        print("USE 2 2")
-    }else if playerItem == "DISH-ICE_CREAM" {
-        print("USE 7 0")
-    }else if playerItem == "DISH-ICE_CREAM-BLUEBERRIES" {
-        print("USE 5 6")
+enum Command {
+    case move(Position)
+    case use(Position)
+    case wait
+    
+    var print: String {
+        switch self {
+        case .move(let p):
+            return "MOVE \(p.x) \(p.y)"
+        case .use(let p):
+            return "USE \(p.x) \(p.y)"
+        case .wait:
+            return "WAIT"
+        }
     }
 }
 
+// MOVE x y
+// USE x y
+// WAIT
+func decideAction() -> String {
+    
+    // check current customers
+    
+    guard let wearing = player1.wearing else {
+        // get dish
+        return Command.use(board.d.position).print
+    }
+    
+    // make this more smart
+    let distanceB = distance(from: player1.position, to: board.b.position)
+    let distanceI = distance(from: player1.position, to: board.i.position)
+    
+    if distanceB < distanceI {
+        guard wearing.ingrediences.contains(.blueberries) else {
+            return Command.use(board.b.position).print
+        }
+        guard wearing.ingrediences.contains(.iceCream) else {
+            return Command.use(board.i.position).print
+        }
+        
+    } else {
+        guard wearing.ingrediences.contains(.iceCream) else {
+            return Command.use(board.i.position).print
+        }
+        
+        guard wearing.ingrediences.contains(.blueberries) else {
+            return Command.use(board.b.position).print
+        }
+    }
+    
+    return Command.use(board.w.position).print
+}
+
+func distance(from fromPosition: Position, to toPosition: Position) -> Int {
+    let y = toPosition.y - fromPosition.y
+    let x = toPosition.x - fromPosition.x
+    let distance = abs(y) + abs(x)
+    return distance
+}

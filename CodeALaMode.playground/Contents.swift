@@ -6,41 +6,41 @@ import Darwin
 var input = [
     "20",
     "DISH-BLUEBERRIES-ICE_CREAM 650",
+    "DISH-ICE_CREAM-BLUEBERRIES-CHOPPED_STRAWBERRIES 1050",
+    "DISH-CHOPPED_STRAWBERRIES-BLUEBERRIES-ICE_CREAM 1050",
+    "DISH-ICE_CREAM-BLUEBERRIES 650",
+    "DISH-ICE_CREAM-BLUEBERRIES-CHOPPED_STRAWBERRIES 1050",
+    "DISH-CHOPPED_STRAWBERRIES-ICE_CREAM-BLUEBERRIES 1050",
+    "DISH-CHOPPED_STRAWBERRIES-BLUEBERRIES-ICE_CREAM 1050",
+    "DISH-BLUEBERRIES-CHOPPED_STRAWBERRIES 850",
+    "DISH-CHOPPED_STRAWBERRIES-BLUEBERRIES-ICE_CREAM 1050",
+    "DISH-CHOPPED_STRAWBERRIES-ICE_CREAM-BLUEBERRIES 1050",
+    "DISH-CHOPPED_STRAWBERRIES-ICE_CREAM-BLUEBERRIES 1050",
+    "DISH-BLUEBERRIES-ICE_CREAM-CHOPPED_STRAWBERRIES 1050",
+    "DISH-CHOPPED_STRAWBERRIES-BLUEBERRIES 850",
+    "DISH-BLUEBERRIES-CHOPPED_STRAWBERRIES-ICE_CREAM 1050",
     "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
+    "DISH-BLUEBERRIES-ICE_CREAM-CHOPPED_STRAWBERRIES 1050",
     "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
+    "DISH-BLUEBERRIES-CHOPPED_STRAWBERRIES 850",
+    "DISH-CHOPPED_STRAWBERRIES-ICE_CREAM-BLUEBERRIES 1050",
     "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650",
-    "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "#####D#####",
-    "#........1#",
-    "#.####.##.#",
-    "#.#..I.0#.#",
-    "#.##.####.#",
+    "I####D#####",
     "#.........#",
-    "B####W#####",
+    "#1C###.##.#",
+    "#.#0.#..#.#",
+    "#.S#.####.B",
+    "#.........#",
+    "#####W#####",
     "199",
-    "7 3 DISH-ICE_CREAM",
-    "9 1 NONE",
+    "3 3 NONE",
+    "1 2 NONE",
     "0",
     "NONE 0",
     "3",
     "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-BLUEBERRIES-ICE_CREAM 650",
-    "DISH-ICE_CREAM-BLUEBERRIES 650"
+    "DISH-ICE_CREAM-BLUEBERRIES-CHOPPED_STRAWBERRIES 1050",
+    "DISH-CHOPPED_STRAWBERRIES-BLUEBERRIES-ICE_CREAM 1050"
 ]
 
 func readLine() -> String? {
@@ -72,6 +72,7 @@ func debug(_ mess: Any) {
  
 */
 
+
 // REAL CODE here
 func read() -> String {
     let line = readLine()!
@@ -101,6 +102,8 @@ enum Entity: String {
     case window = "W"
     case blueberry = "B"
     case iceCream = "I"
+    case strawberries = "S"
+    case choppingBoard = "C"
     
     var print: String {
         self.rawValue
@@ -111,11 +114,16 @@ enum Item: String {
     case dish = "DISH"
     case blueberries = "BLUEBERRIES"
     case iceCream = "ICE_CREAM"
+    case strawberries = "STRAWBERRIES"
+    case choppedStrawberries = "CHOPPED_STRAWBERRIES"
     
-    static func makeItems(withIngrediences ingrediences: String) -> [Item] {
-        return ingrediences.split(separator: "-").compactMap { itemChar in
+    static func makeItems(withIngrediences ingrediences: String) -> Set<Item> {
+        var uniqueItems = Set<Item>()
+        let items = ingrediences.split(separator: "-").compactMap { itemChar in
             Item(rawValue: String(itemChar))
         }
+        uniqueItems = Set(items)
+        return uniqueItems
     }
 }
 
@@ -148,6 +156,8 @@ class Board {
     var w: Cell!
     var b: Cell!
     var i: Cell!
+    var s: Cell!
+    var c: Cell!
     
     //var visitedCells: [Cell] = []
     
@@ -183,6 +193,10 @@ class Board {
                 b = cell
             case .iceCream:
                 i = cell
+            case .strawberries:
+                s = cell
+            case .choppingBoard:
+                c = cell
             default: ()
             }
            
@@ -249,8 +263,8 @@ class Player {
     }
 }
 
-struct Dish {
-    var ingrediences: [Item]
+struct Dish: Equatable {
+    var ingrediences: Set<Item>
     
     init(ingrediences: String) {
         self.ingrediences = Item.makeItems(withIngrediences: ingrediences)
@@ -264,6 +278,18 @@ struct Dish {
     }
 }
 
+struct Order {
+    var dish: Dish
+    var award: Int
+    
+    init(item: String, award: Int) {
+        dish = Dish.make(fromItem: item)!
+        self.award = award
+    }
+}
+
+var fullOrderList: [Order] = []
+var currentOrderList: [Order] = []
 
 let numAllCustomers = Int(read())!
 if numAllCustomers > 0 {
@@ -271,6 +297,7 @@ if numAllCustomers > 0 {
         let inputs = (read()).split(separator: " ").map(String.init)
         let customerItem = inputs[0] // the food the customer is waiting for
         let customerAward = Int(inputs[1])! // the number of points awarded for delivering the food
+        fullOrderList.append(Order(item: customerItem, award: customerAward))
     }
 }
 var board = Board()
@@ -282,6 +309,8 @@ var player1 = Player(position: board.p1.position, item: "NONE")
 var player2 = Player(position: board.p2.position, item: "NONE")
 
 board.printBoard()
+
+
 
 // game loop
 while loop() {
@@ -317,13 +346,14 @@ while loop() {
     let ovenContents = inputs3[0] // ignore until wood 1 league
     let ovenTimer = Int(inputs3[1])!
     
-    
+    currentOrderList = []
     let numCustomers = Int(read())! // the number of customers currently waiting for food
     if numCustomers > 0 {
-        for i in 0...(numCustomers-1) {
+        for _ in 0...(numCustomers-1) {
             let inputs = (read()).split(separator: " ").map(String.init)
             let customerItem = inputs[0]
             let customerAward = Int(inputs[1])!
+            currentOrderList.append(Order(item: customerItem, award: customerAward))
         }
     }
 
@@ -359,38 +389,107 @@ enum Command {
     }
 }
 
+var current: Dish?
+
 // MOVE x y
 // USE x y
 // WAIT
 func decideAction() -> String {
     
-    // check current customers
-    
-    guard let wearing = player1.wearing else {
-        // get dish
-        return Command.use(board.d.position).print
-    }
-    
-    // make this more smart
-    let distanceB = distance(from: player1.position, to: board.b.position)
-    let distanceI = distance(from: player1.position, to: board.i.position)
-    
-    if distanceB < distanceI {
-        guard wearing.ingrediences.contains(.blueberries) else {
-            return Command.use(board.b.position).print
-        }
-        guard wearing.ingrediences.contains(.iceCream) else {
-            return Command.use(board.i.position).print
+    let dish: Dish
+    if let c = current {
+        if currentOrderList.contains(where: { $0.dish == current }) {
+            dish = c
+        } else if let wearing = player1.wearing {
+            // dish is already fullfiled
+            // check if dish with already wearing ingrediences is wished
+            if let newDish = currentOrderList.first(where: { order in
+                wearing.ingrediences.isSubset(of: order.dish.ingrediences)
+            }) {
+                dish = newDish.dish
+            } else if fullOrderList.contains(where: { order in
+                wearing.ingrediences.isSubset(of: order.dish.ingrediences)
+            }) {
+                return Command.use(board.w.position).print // trash at first. Store om empty table later ...
+            }
+            // check if ingredeience on dish is needed in whole orderlist
+            // otherwise trash it
+            return Command.use(board.w.position).print
+        } else {
+            current = nil
+            dish = currentOrderList.first!.dish
         }
         
     } else {
-        guard wearing.ingrediences.contains(.iceCream) else {
-            return Command.use(board.i.position).print
+        dish = currentOrderList.first!.dish
+    }
+    
+    current = dish
+    
+    // check what player2 trys to serve
+    // think about concept for working on receipe
+    // receipe will define order of actions
+    //
+    
+    guard let wearing = player1.wearing else {
+        if dish.ingrediences.contains(.choppedStrawberries) {
+            // get strawberies
+            return Command.use(board.s.position).print
+        } else {
+            // get dish
+            return Command.use(board.d.position).print
+        }
+    }
+    
+    if dish.ingrediences.contains(.choppedStrawberries) {
+        
+        if wearing.ingrediences.contains(.strawberries) {
+            return Command.use(board.c.position).print
         }
         
-        guard wearing.ingrediences.contains(.blueberries) else {
-            return Command.use(board.b.position).print
+        if !wearing.ingrediences.contains(.dish) {
+            return Command.use(board.d.position).print
         }
+        
+        
+    }
+    
+    if dish.ingrediences.contains(.blueberries) && dish.ingrediences.contains(.iceCream) {
+        // make this more smart
+        let distanceB = distance(from: player1.position, to: board.b.position)
+        let distanceI = distance(from: player1.position, to: board.i.position)
+        
+        if distanceB < distanceI {
+            guard wearing.ingrediences.contains(.blueberries) else {
+                return Command.use(board.b.position).print
+            }
+            guard wearing.ingrediences.contains(.iceCream) else {
+                return Command.use(board.i.position).print
+            }
+            
+        } else {
+            guard wearing.ingrediences.contains(.iceCream) else {
+                return Command.use(board.i.position).print
+            }
+            
+            guard wearing.ingrediences.contains(.blueberries) else {
+                return Command.use(board.b.position).print
+            }
+        }
+    } else {
+        
+        if dish.ingrediences.contains(.blueberries) {
+            guard wearing.ingrediences.contains(.blueberries) else {
+                return Command.use(board.b.position).print
+            }
+        }
+        
+        if dish.ingrediences.contains(.iceCream) {
+            guard wearing.ingrediences.contains(.iceCream) else {
+                return Command.use(board.i.position).print
+            }
+        }
+        
     }
     
     return Command.use(board.w.position).print

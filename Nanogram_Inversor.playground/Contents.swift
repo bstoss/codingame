@@ -367,6 +367,8 @@ class Grid {
         
         debug("ruleOneNumber - match -> next rules")
         var changed = false
+        var from = 1
+        var to = size
         
         // TODO: check for possible space.
         // check if already contains a filled one
@@ -387,18 +389,26 @@ class Grid {
             debug("\(lastIndex)")
             
             let safeRange = (number.value-fbCount)
+            debug("\(safeRange)")
+            let first = (firstIndex-safeRange)
+            let last = (lastIndex+safeRange)
+            
+            debug("\(first)")
+            debug("\(last)")
+            
             var boxesToChange: [Box] = []
             
-            if (firstIndex-safeRange) > 0 {
-                boxesToChange += boxes[..<((firstIndex)-safeRange)]
+            if first > 0 {
+                boxesToChange += boxes[..<first]
             }
             
-            if (lastIndex+safeRange) < (boxes.count-1) {
-                boxesToChange += boxes[(lastIndex+safeRange)...]
+            if last < (boxes.count-1) {
+                boxesToChange += boxes[last...]
             }
             
             
             for box in boxesToChange.filter({ $0.state == .unknown }) {
+                debug("ruleOneNumber - set box empty \(box.pos)")
                 box.state = .empty
                 changed = true
             }
@@ -406,31 +416,11 @@ class Grid {
             if changed {
                 return true
             }
-            
-//            var first = filledBoxes.first!
-//            var last = filledBoxes.last!
-//            
-//            // 4 ... 2fb .. pos 6... alles bis 4 empty
-//            
-//            var emptyLeftRange = first.pos.x - (number.value-fbCount)
-//            var emptyRightRange = last.pos.x + (number.value-fbCount)
-//            
-//            var unknownBoxes = boxes.filter { $0.state == .unknown }
-//            
-//            unknownBoxes.forEach { box in
-//                if box.pos.x < emptyLeftRange {
-//                    box.state = .empty
-//                    changed = true
-//                }
-//                if box.pos.x > emptyRightRange {
-//                    box.state = .empty
-//                    changed = true
-//                }
-//            }
-//            
-//            return changed
-            
+    
             // check new middle range
+                
+            from = max(first+1, 1)
+            to = min(last+1, size)
             
             // fill all?
             
@@ -443,12 +433,40 @@ class Grid {
         // something like rules ...
         
         debug("one number. fill middle")
-        
+        /*
+         |   |   |   |   |   |   | 1 | 1 | 1 |   |
+         |   |   |   |   | 1 | 1 | 1 | 1 | 1 |   |
+         | 2 | 4 | 4 | 8 | 1 | 1 | 2 | 4 | 4 | 8 |
+       4 |   | · | · | · |   |   |   |   |   |   |
+     3 1 |   | · | · |   |   |   |   |   |   | ■ |
+     1 3 |   | · | · | ■ |   |   |   |   |   | ■ |
+     4 1 |   | · | · | ■ |   |   |   |   |   | ■ |
+     1 1 | · | · | · | ■ | · | · | · | · | · | ■ |
+     1 3 |   |   |   | ■ |   |   |   |   |   | ■ |
+     3 4 |   |   | ■ | ■ |   |   | ■ | ■ | ■ | ■ |
+     4 4 |   | ■ | ■ | ■ |   |   | ■ | ■ | ■ | ■ |
+     4 2 |   |   |   | ■ |   |   |   |   |   |   |
+       2 |   |   |   |   |   |   |   |   |   |   |
+         
+         |   |   |   |   |   |   | 1 | 1 | 1 |   |
+         |   |   |   |   | 1 | 1 | 1 | 1 | 1 |   |
+         | 2 | 4 | 4 | 8 | 1 | 1 | 2 | 4 | 4 | 8 |
+       4 |   | · | · | · |   |   |   |   |   |   |
+     3 1 |   | · | · | ■ |   |   |   |   |   | ■ |
+     1 3 |   | · | · | ■ |   |   |   |   |   | ■ |
+     4 1 |   | · | · | ■ |   |   |   |   |   | ■ |
+     1 1 | · | · | · | ■ | · | · | · | · | · | ■ |
+     1 3 |   |   | ■ | ■ |   |   |   |   |   | ■ |
+     3 4 | · | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ |
+     4 4 |   | ■ | ■ | ■ |   |   | ■ | ■ | ■ | ■ |
+     4 2 |   |   |   | ■ |   |   |   |   |   | · |
+       2 |   |   |   | · |   |   |   |   |   | · |
+         */
         
         changed = ruleFillMiddles(
             number: number,
-            from: 1,
-            to: size,
+            from: from,
+            to: to,
             boxes: boxes
         )
         
@@ -477,7 +495,7 @@ class Grid {
     
     private func ruleFillMiddles(number: Number, from: Int, to: Int, boxes: [Box]) -> Bool {
         
-        debug("ruleFillMiddles")
+        debug("ruleFillMiddles from: \(from) to: \(to)")
         
         var changed = false
         
@@ -490,7 +508,7 @@ class Grid {
             return false
         }
         
-        debug("ruleFillMiddles - match -> fillMiddles")
+        debug("ruleFillMiddles - match -> fillMiddles lower \(lower) to \(upper)")
         for j in lower...upper {
             // use j - 1
             if j > 0 && (j-1) < boxes.count {

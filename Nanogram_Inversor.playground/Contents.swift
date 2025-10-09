@@ -53,6 +53,40 @@ var inputMusic = [
     "2"
 ]
 
+var inputAfrica = [
+    "15 15",
+    "3",
+    "4",
+    "1 4 3",
+    "1 4",
+    "7 5",
+    "2 4",
+    "4 4",
+    "2 6",
+    "4",
+    "1 4 3",
+    "1 4",
+    "7 2",
+    "2 4 1",
+    "4 3 1",
+    "2 7",
+    "1 1 1 1",
+    "1 3 1 3",
+    "5 5",
+    "1 2 1 2",
+    "1 1",
+    "2 2",
+    "2 2",
+    "2 2",
+    "2 2 1",
+    "3 4 3",
+    "3 6 4",
+    "2 5 4",
+    "2 6 1 1",
+    "1 2 1 1 1",
+    "1 1 1 1 3"
+]
+
 var expectedTutorialOutput = [
     "2",
     "2",
@@ -98,6 +132,39 @@ var expectedOutputMusic = [
     "2",
     "3 1",
     "1 7"
+]
+
+var expectedOutputAfrica = [
+    "9 3",
+    "9 2",
+    "1 5 1",
+    "2 2 6",
+    "3",
+    "1 7 1",
+    "5 2",
+    "2 5",
+    "9 2",
+    "1 5 1",
+    "2 2 6",
+    "3 3",
+    "1 6 1",
+    "5 2",
+    "2 4",
+    "4 1 4 1 1",
+    "2 1 2 1 1",
+    "3 2",
+    "4 1 3 1",
+    "4 6 3",
+    "3 5 3",
+    "3 5 3",
+    "2 5 4",
+    "2 5 3",
+    "3 2",
+    "1 1",
+    "2 2",
+    "1 1 2 1",
+    "2 1 1 1 4",
+    "2 1 2 1 2"
 ]
 
 var input = inputMusic
@@ -150,11 +217,35 @@ func readLine() -> String? {
 4 4 | ■ | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ |
 4 2 | ■ | ■ | ■ | ■ | · | · | · | ■ | ■ | · |
   2 | · | ■ | ■ | · | · | · | · | · | · | · |
+ 
+ 
  */
+        
+            /*
+             |   |   | 1 |   |   |   |   |   |   | 1 |   |   | 2 | 4 |   |
+             |   |   | 4 | 1 | 7 | 2 | 4 | 2 |   | 4 | 1 | 7 | 4 | 3 | 2 |
+             | 3 | 4 | 3 | 4 | 5 | 4 | 4 | 6 | 4 | 3 | 4 | 2 | 1 | 1 | 7 |
+     1 1 1 1 | · | · | · | · | ■ | · | ■ | · | · | · | · | ■ | · | ■ | · |
+     1 3 1 3 | · | · | ■ | · | ■ | ■ | ■ | · | · | ■ | · | ■ | ■ | ■ | · |
+         5 5 | · | · | · | ■ | ■ | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ | ■ |
+     1 2 1 2 | · | · | · | · | ■ | · | ■ | ■ | · | · | · | ■ | · | ■ | ■ |
+         1 1 | · | · | · | · | ■ | · | · | · | · | · | · | ■ | · | · | · |
+         2 2 | · | · | · | ■ | ■ | · | · | · | · | · | ■ | ■ | · | · | · |
+         2 2 | · | · | · | ■ | ■ | · | · | · | · | · | ■ | ■ | · | · | · |
+         2 2 | · | · | ■ | ■ | · | · | · | · | · | ■ | ■ | · | · | · | · |
+       2 2 1 | · | · | ■ | ■ | · | · | · | · | · | ■ | ■ | · | · | · | ■ |
+       3 4 3 | ■ | ■ | ■ | · | · | · | ■ | ■ | ■ | ■ | · | · | ■ | ■ | ■ |
+       3 6 4 | ■ | ■ | ■ | · | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ | ■ |
+       2 5 4 | ■ | ■ | · | · | ■ | ■ | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ |
+     2 6 1 1 | · | ■ | ■ | · | ■ | ■ | ■ | ■ | ■ | ■ | · | · | ■ | · | ■ |
+   1 2 1 1 1 | · | · | ■ | · | ■ | ■ | · | ■ | · | ■ | · | · | · | · | ■ |
+   1 1 1 1 3 | · | · | ■ | · | ■ | · | · | ■ | · | ■ | · | · | ■ | ■ | ■ |
+            */
 
 func debug(_ message: String) {
     print(message)
 }
+
 
 /// START
 
@@ -351,6 +442,7 @@ class Grid {
                 boxes[boxIndex].state = .empty
                 boxIndex += 1
             }
+            number.fullfilled = true
         }
             
         return true
@@ -620,7 +712,7 @@ class Grid {
             var lastNumber = config.numbers.last!
             debug("ruleMultipleNumbers - firstNumber: \(firstNumber.value) lastNumber: \(lastNumber.value)")
             
-            if firstIndex == 0 && boxes[0...firstNumber.value].contains(where: { $0.state == .unknown }) {
+            if firstIndex == 0 && boxes[0...firstNumber.value].contains(where: { $0.state == .unknown }) && !firstNumber.fullfilled {
                 debug("ruleMultipleNumbers - hit first border - fill rest")
                 boxes[0..<firstNumber.value].forEach({
                     debug("box: \($0.pos) filled")
@@ -633,19 +725,19 @@ class Grid {
                 changed = true
             }
             
-            if !boxes[0..<firstIndex].contains(where: { $0.state == .unknown }) {
+            if !boxes[0..<firstIndex].contains(where: { $0.state == .unknown }) && !firstNumber.fullfilled {
                 debug("ruleMultipleNumbers - hit first border - fill rest - borde was an empty")
                 boxes[firstIndex..<(firstNumber.value+firstIndex-1)].forEach({
                     debug("box: \($0.pos) filled")
                     $0.state = .filled
                 })
                 boxes[firstIndex+firstNumber.value].state = .empty
-                debug("box: \(boxes[firstNumber.value].pos) empty")
+                debug("box: \(boxes[firstIndex+firstNumber.value].pos) empty")
                 firstNumber.fullfilled = true
                 changed = true
             }
             
-            if lastIndex == size-1 && boxes[(size-lastNumber.value-1)...].contains(where: { $0.state == .unknown }) {
+            if lastIndex == size-1 && boxes[(size-lastNumber.value-1)...].contains(where: { $0.state == .unknown }) && !lastNumber.fullfilled {
                 // ruleMultipleNumbers - firstIndexPos: 4 lastIndexPos: 10
                 debug("ruleMultipleNumbers - hit last border - fill rest")
                 boxes[(size-lastNumber.value)...].forEach({
@@ -654,6 +746,18 @@ class Grid {
                 })
                 boxes[size-lastNumber.value-1].state = .empty
                 debug("box: \(boxes[size-lastNumber.value-1].pos) empty")
+                lastNumber.fullfilled = true
+                changed = true
+            }
+            
+            if !boxes[lastIndex...].contains(where: { $0.state == .unknown }) && !lastNumber.fullfilled {
+                debug("ruleMultipleNumbers - hit last border - fill rest - borde was an empty")
+                boxes[lastIndex-lastNumber.value-1..<lastIndex].forEach({
+                    debug("box: \($0.pos) filled")
+                    $0.state = .filled
+                })
+                boxes[lastIndex-lastNumber.value].state = .empty
+                debug("box: \(boxes[lastIndex-lastNumber.value].pos) empty")
                 lastNumber.fullfilled = true
                 changed = true
             }

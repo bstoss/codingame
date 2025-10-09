@@ -569,8 +569,148 @@ class Grid {
             if didChange {
                 changed = true
             }
-            
         }
+        
+//        debug("ruleMultipleNumbers - fill borders if not fit")
+//        if boxes.contains(where: { $0.state == .empty }) {
+//            
+////            var firstNumber = config.numbers.first!
+////            var lastNumber = config.numbers.last!
+////            debug("ruleMultipleNumbers - firstNumber: \(firstNumber.value) lastNumber: \(lastNumber.value)")
+////            
+//            var numberIndex = 0
+//            
+//            for index in boxes.indices {
+//                guard boxes[index].state == .unknown else { continue }
+//                guard numberIndex < config.numbers.count else { break }
+//                
+//                var number = config.numbers[numberIndex]
+//                
+//                let minIndex = max(0, index-(number.value-1))
+//                let maxIndex = min(size-1, index+(number.value-1))
+//                debug("ruleMultipleNumbers - index: \(index) minIndex: \(minIndex) maxIndex: \(maxIndex)")
+//                var filtered = boxes[minIndex...maxIndex].filter({ $0.state == .unknown || $0.state == .filled })
+//                
+//                filtered.forEach { box in
+//                    debug("box pos: \(box.pos) state: \(box.state)")
+//                }
+//                
+//                if filtered.count < number.value {
+//                    debug("ruleMultipleNumbers - change box \(boxes[index].pos)")
+//                    boxes[index].state = .empty
+//                    changed = true
+//                } else {
+//                    debug("ruleMultipleNumbers - number does fit. go to next")
+//                    numberIndex += 1
+//                }
+//            }
+//        } else {
+//            debug("ruleMultipleNumbers - no empty fields")
+//        }
+        
+        debug("ruleMultipleNumbers - check border fields")
+        
+        if boxes.contains(where: { $0.state == .filled }) {
+            
+            let firstIndex = boxes.firstIndex(where: { $0.state == .filled })!
+            let lastIndex = boxes.lastIndex(where: { $0.state == .filled })!
+            debug("ruleMultipleNumbers - firstIndexPos: \(firstIndex+1) lastIndexPos: \(lastIndex+1)")
+            
+            var firstNumber = config.numbers.first!
+            var lastNumber = config.numbers.last!
+            debug("ruleMultipleNumbers - firstNumber: \(firstNumber.value) lastNumber: \(lastNumber.value)")
+            
+            if firstIndex == 0 && boxes[0...firstNumber.value].contains(where: { $0.state == .unknown }) {
+                debug("ruleMultipleNumbers - hit first border - fill rest")
+                boxes[0..<firstNumber.value].forEach({
+                    debug("box: \($0.pos) filled")
+                    $0.state = .filled
+                })
+                
+                boxes[firstNumber.value].state = .empty
+                debug("box: \(boxes[firstNumber.value].pos) empty")
+                firstNumber.fullfilled = true
+                changed = true
+            }
+            
+            if !boxes[0..<firstIndex].contains(where: { $0.state == .unknown }) {
+                debug("ruleMultipleNumbers - hit first border - fill rest - borde was an empty")
+                boxes[firstIndex..<(firstNumber.value+firstIndex-1)].forEach({
+                    debug("box: \($0.pos) filled")
+                    $0.state = .filled
+                })
+                boxes[firstIndex+firstNumber.value].state = .empty
+                debug("box: \(boxes[firstNumber.value].pos) empty")
+                firstNumber.fullfilled = true
+                changed = true
+            }
+            
+            if lastIndex == size-1 && boxes[(size-lastNumber.value-1)...].contains(where: { $0.state == .unknown }) {
+                // ruleMultipleNumbers - firstIndexPos: 4 lastIndexPos: 10
+                debug("ruleMultipleNumbers - hit last border - fill rest")
+                boxes[(size-lastNumber.value)...].forEach({
+                    debug("box: \($0.pos) filled")
+                    $0.state = .filled
+                })
+                boxes[size-lastNumber.value-1].state = .empty
+                debug("box: \(boxes[size-lastNumber.value-1].pos) empty")
+                lastNumber.fullfilled = true
+                changed = true
+            }
+            
+    
+            debug("ruleMultipleNumbers - check first filled if can be raised")
+            
+            
+            let lastEmptyBoxFromFirstIndex = boxes[0..<firstIndex].lastIndex(where: { $0.state == .empty }) ?? 0
+            debug("ruleMultipleNumbers - LastEmptyFromFirstPos: \(lastEmptyBoxFromFirstIndex+1)")
+            
+            
+//            if firstNumber.value == 1, firstIndex == 1,  !firstNumber.fullfilled {
+//                debug("ruleMultipleNumbers - first number already done")
+//                firstNumber.fullfilled = true
+//                boxes[0..<firstIndex].forEach { box in
+//                    debug("box \(box.pos) empty")
+//                    box.state = .empty
+//                }
+//
+//                boxes[firstNumber.value].state = .empty
+//                changed = true
+//            }
+            
+            
+            if firstIndex+1 <= firstNumber.value {
+                debug("ruleMultipleNumbers - first filled is smaller than first number")
+                boxes[firstIndex..<firstNumber.value].forEach { box in
+                    if box.state != .filled {
+                        debug("box \(box.pos) filled")
+                        box.state = .filled
+                        changed = true
+                    }
+                }
+                
+                if boxes[firstIndex..<firstNumber.value].filter({ $0.state == .filled }).count == firstNumber.value {
+                    debug("FirstNumber \(firstNumber.fullfilled) fillfilled")
+                    firstNumber.fullfilled = true
+                    
+                    boxes[0..<firstIndex].forEach { box in
+                        debug("box \(box.pos) empty")
+                        box.state = .empty
+                    }
+    
+                    boxes[firstNumber.value].state = .empty
+                }
+
+            } else {
+                debug("ruleMultipleNumbers - not raised")
+            }
+            
+            
+        } else {
+            debug("ruleMultipleNumbers - no filled boxes")
+        }
+        
+        
         
         return changed
     }

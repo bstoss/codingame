@@ -403,7 +403,7 @@ class Grid {
             }
             
             if last < (boxes.count-1) {
-                boxesToChange += boxes[last...]
+                boxesToChange += boxes[(last+1)...]
             }
             
             
@@ -416,77 +416,64 @@ class Grid {
             if changed {
                 return true
             }
-    
-            // check new middle range
-                
-            from = max(first+1, 1)
-            to = min(last+1, size)
-            
-            // fill all?
             
         } else {
             debug("ruleOneNumber - no filled boxes")
         }
+        
+        debug("ruleOneNumber - set empty where not fit")
+        if boxes.contains(where: { $0.state == .empty }) {
+            for index in boxes.indices {
+                guard boxes[index].state == .unknown else { continue }
+                
+                let minIndex = max(0, index-(number.value-1))
+                let maxIndex = min(size-1, index+(number.value-1))
+                debug("ruleOneNumber - index: \(index) minIndex: \(minIndex) maxIndex: \(maxIndex)")
+                var filtered = boxes[minIndex...maxIndex].filter({ $0.state == .unknown || $0.state == .filled })
+                
+                filtered.forEach { box in
+                    debug("box pos: \(box.pos) state: \(box.state)")
+                }
+                
+                if filtered.count < number.value {
+                    debug("ruleOneNumber - change box \(boxes[index].pos)")
+                    boxes[index].state = .empty
+                    changed = true
+                }
+            }
+        } else {
+            debug("ruleOneNumber - no empty fields")
+        }
+        
+        if changed {
+            return true
+        }
+        
+        debug("ruleOneNumber - set middle range")
+        var firstEmptyIndex = boxes.firstIndex(where: { $0.state == .unknown })!
+        var lastEmptyIndex = boxes.lastIndex(where: { $0.state == .unknown })!
+            
+        debug("ruleOneNumber firstEmptyIndex: \(firstEmptyIndex)")
+        debug("ruleOneNumber lastEmptyIndex: \(lastEmptyIndex)")
+        
+        from = max(firstEmptyIndex+1, 1)
+        to = min(lastEmptyIndex+1, size)
+        
+        debug("ruleOneNumber - from: \(from)")
+        debug("ruleOneNumber - to: \(to)")
         
         debug("find possible space")
         // TODO: find a way to reafactor ....
         // something like rules ...
         
         debug("one number. fill middle")
-        /*
-         |   |   |   |   |   |   | 1 | 1 | 1 |   |
-         |   |   |   |   | 1 | 1 | 1 | 1 | 1 |   |
-         | 2 | 4 | 4 | 8 | 1 | 1 | 2 | 4 | 4 | 8 |
-       4 |   | · | · | · |   |   |   |   |   |   |
-     3 1 |   | · | · |   |   |   |   |   |   | ■ |
-     1 3 |   | · | · | ■ |   |   |   |   |   | ■ |
-     4 1 |   | · | · | ■ |   |   |   |   |   | ■ |
-     1 1 | · | · | · | ■ | · | · | · | · | · | ■ |
-     1 3 |   |   |   | ■ |   |   |   |   |   | ■ |
-     3 4 |   |   | ■ | ■ |   |   | ■ | ■ | ■ | ■ |
-     4 4 |   | ■ | ■ | ■ |   |   | ■ | ■ | ■ | ■ |
-     4 2 |   |   |   | ■ |   |   |   |   |   |   |
-       2 |   |   |   |   |   |   |   |   |   |   |
-         
-         |   |   |   |   |   |   | 1 | 1 | 1 |   |
-         |   |   |   |   | 1 | 1 | 1 | 1 | 1 |   |
-         | 2 | 4 | 4 | 8 | 1 | 1 | 2 | 4 | 4 | 8 |
-       4 |   | · | · | · |   |   |   |   |   |   |
-     3 1 |   | · | · | ■ |   |   |   |   |   | ■ |
-     1 3 |   | · | · | ■ |   |   |   |   |   | ■ |
-     4 1 |   | · | · | ■ |   |   |   |   |   | ■ |
-     1 1 | · | · | · | ■ | · | · | · | · | · | ■ |
-     1 3 |   |   | ■ | ■ |   |   |   |   |   | ■ |
-     3 4 | · | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ |
-     4 4 |   | ■ | ■ | ■ |   |   | ■ | ■ | ■ | ■ |
-     4 2 |   |   |   | ■ |   |   |   |   |   | · |
-       2 |   |   |   | · |   |   |   |   |   | · |
-         */
-        
+
         changed = ruleFillMiddles(
             number: number,
             from: from,
             to: to,
             boxes: boxes
         )
-        
-        if boxes.filter({ $0.state == .filled }).count == number.value {
-            debug("ruleOneNumber - all filled -> fill emptys")
-            for box in boxes.filter({$0.state == .unknown}) {
-                box.state = .empty
-            }
-            number.fullfilled = true
-            changed = true
-        }
-        
-        if boxes.filter({ $0.state != .empty }).count == number.value {
-            debug("ruleOneNumber - all filled -> fill emptys")
-            for box in boxes.filter({$0.state == .unknown}) {
-                box.state = .filled
-            }
-            number.fullfilled = true
-            changed = true
-        }
         
         
         return changed
@@ -500,6 +487,8 @@ class Grid {
         var changed = false
         
         var outers = to - (from-1) - number.value
+        debug("ruleFillMiddles outer: \(outers)")
+        
         var lower = from + outers
         var upper = to - outers
         
@@ -513,19 +502,101 @@ class Grid {
             // use j - 1
             if j > 0 && (j-1) < boxes.count {
                 var box = boxes[j-1]
+                debug("box \(box.pos)")
                 if box.state == .unknown {
                     box.state = .filled
                     changed = true
                 }
                 
             }
-            
-//            if var box = boxes.first(where: { $0.pos.x == j  && $0.state == .unknown }) {
-//                box.state = .filled
-//                changed = true
-//            }
         }
                 
+        return changed
+    }
+    
+    private func ruleMultipleNumbers(config: Config, size: Int, boxes: [Box]) -> Bool {
+        var changed = false
+        
+        debug("ruleMultipleNumbers")
+        
+        let countOfNumbers = config.numbers.count
+        
+        guard countOfNumbers > 1 else {
+            debug("ruleMultipleNumbers - no multiple numbers")
+            return false
+        }
+            
+            
+        debug("ruleMultipleNumbers - numbers - \(countOfNumbers)")
+        
+        for ii in 0..<countOfNumbers {
+            // search for middles?
+            var number = config.numbers[ii]
+            
+            guard !number.fullfilled else {
+                continue
+            }
+            
+            debug("ruleMultipleNumbers - check middle for index: \(ii) - value: \(number.value)")
+            
+            var from = 1
+            if ii > 0 {
+                // add unfree space from numbers befor index
+                for j in 0..<ii {
+                    from += 1
+                    from += config.numbers[j].value
+                }
+            }
+            
+            var to = size
+            if ii+1 < countOfNumbers {
+                // add unfree space from numbers after index
+                for j in ii+1..<countOfNumbers {
+                    to -= 1
+                    to -= config.numbers[j].value
+                }
+            }
+            
+            debug("ruleMultipleNumbers - from: \(from), to: \(to)")
+            
+            let didChange = ruleFillMiddles(
+                number: number,
+                from: from,
+                to: to,
+                boxes: boxes
+            )
+            
+            if didChange {
+                changed = true
+            }
+            
+        }
+        
+        return changed
+    }
+    
+    private func ruleCheckDone(config: Config, boxes: [Box]) -> Bool {
+        debug("ruleCheckDone")
+        
+        var changed = false
+        if boxes.filter({ $0.state == .filled }).count == config.numbersSize {
+            debug("ruleCheckDone - all filled -> fill emptys")
+            for box in boxes.filter({$0.state == .unknown}) {
+                box.state = .empty
+            }
+            config.numbers.forEach { $0.fullfilled = true }
+            changed = true
+        }
+        
+        if boxes.filter({ $0.state != .empty }).count == config.numbersSize {
+            debug("ruleCheckDone - all filled -> fill emptys")
+            for box in boxes.filter({$0.state == .unknown}) {
+                box.state = .filled
+            }
+            config.numbers.forEach { $0.fullfilled = true }
+            changed = true
+        }
+        
         return changed
     }
    
@@ -557,7 +628,7 @@ class Grid {
                     configBoxes = boxes.filter { $0.pos.x == config.pos.x }
                     sizeForRule = height
                 }
-                
+                                
                 guard !ruleFillAll(config: config, size: sizeForRule, boxes: configBoxes) else {
                     debug("ruleFillAll -> changed and continue")
                     changed = true
@@ -570,148 +641,22 @@ class Grid {
                     continue
                 }
                 
+                guard !ruleCheckDone(config: config, boxes: configBoxes) else {
+                    debug("ruleCheckDone -> changed and continue")
+                    changed = true
+                    continue
+                }
+                
                 guard !ruleOneNumber(config: config, size: sizeForRule, boxes: configBoxes) else {
                     debug("ruleOneNumber -> changed and continue")
                     changed = true
                     continue
                 }
                 
-                
-                // check horizontal configs
-                if config.pos.x == 0 {
-                    
-                
-                    let countOfNumbers = config.numbers.count
-                    if countOfNumbers > 1 {
-                        debug("multiple horizontal numbers - \(countOfNumbers)")
-                        
-                        for ii in 0..<countOfNumbers {
-                            // search for middles?
-                            var number = config.numbers[ii]
-                            
-                            guard !number.fullfilled else {
-                                continue
-                            }
-                            
-                            debug("check middle for index: \(ii) - value: \(number.value)")
-                            
-                            var from = 1
-                            if ii > 0 {
-                                // add unfree space from numbers befor index
-                                for j in 0..<ii {
-                                    from += 1
-                                    from += config.numbers[j].value
-                                }
-                            }
-                            
-                            var to = width
-                            if ii+1 < countOfNumbers {
-                                // add unfree space from numbers after index
-                                for j in ii+1..<countOfNumbers {
-                                    to -= 1
-                                    to -= config.numbers[j].value
-                                }
-                            }
-                            
-                            debug("from: \(from), to: \(to)")
-                            
-                            let didChange = fillHorizontalMiddles(
-                                withNumber: number,
-                                y: config.pos.y,
-                                from: from,
-                                to: to,
-                                checkIfDone: false
-                            )
-                            
-                            if didChange {
-                                changed = true
-                            }
-                            
-                        }
-                    }
-                    
-                    
-                    let count = configBoxes.filter({ $0.state == .filled }).count
-                    if count == config.numbersSize  {
-                        debug("done horizontal- fill white")
-                        configBoxes.filter({$0.state == .unknown}).forEach {
-                            $0.state = .empty
-                        }
-                        config.numbers.forEach {  $0.fullfilled = true }
-                        changed = true
-                        
-                    }else {
-                        debug("not done. Current: \(count) - All: \(config.numbersSize)")
-                    }
-                    
-                }
-                // check vertical configs
-                else if config.pos.y == 0 {
-
-                    let countOfNumbers = config.numbers.count
-                    if countOfNumbers > 1 {
-                        
-                        
-                        debug("multiple vertical numbers - \(countOfNumbers)")
-                        
-                        for ii in 0..<countOfNumbers {
-                            // search for middles?
-                            var number = config.numbers[ii]
-                            
-                            guard !number.fullfilled else {
-                                continue
-                            }
-                            
-                            debug("check middle for index: \(ii) - value: \(number.value)")
-                            
-                            var from = 1
-                            if ii > 0 {
-                                // add unfree space from numbers befor index
-                                for j in 0..<ii {
-                                    from += 1
-                                    from += config.numbers[j].value
-                                }
-                            }
-                            
-                            var to = height
-                            if ii+1 < countOfNumbers {
-                                // add unfree space from numbers after index
-                                for j in ii+1..<countOfNumbers {
-                                    to -= 1
-                                    to -= config.numbers[j].value
-                                }
-                            }
-                            
-                            debug("from: \(from), to: \(to)")
-                            
-                            let didChange = fillVerticalMiddles(
-                                withNumber: number,
-                                x: config.pos.x,
-                                from: from,
-                                to: to,
-                                checkIfDone: false
-                            )
-                            
-                            if didChange {
-                                changed = true
-                            }
-                            
-                        }
-                    }
-                    
-                    
-                    let count = configBoxes.filter({ $0.state == .filled }).count
-                    if count == config.numbersSize  {
-                        debug("done verticals - fill white")
-                        configBoxes.filter({$0.state == .unknown}).forEach {
-                            $0.state = .empty
-                        }
-                        config.numbers.forEach {  $0.fullfilled = true }
-                        changed = true
-                        
-                    } else {
-                        debug("verticals not done. Current: \(count) - All: \(config.numbersSize)")
-                    }
+                guard !ruleMultipleNumbers(config: config, size: sizeForRule, boxes: configBoxes) else {
+                    debug("ruleMultipleNumbers -> changed and continue")
+                    changed = true
+                    continue
                 }
 
             }

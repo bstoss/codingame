@@ -126,6 +126,50 @@ var inputCat = [
     "2 5 4"
 ]
 
+var inputDolphin = [
+    "20 20",
+    "1 1",
+    "1 2 1",
+    "3 2",
+    "1 1 1 6",
+    "3 4",
+    "3 2",
+    "3 1 2 2",
+    "1 2 1 2 3",
+    "2 3 3 4",
+    "4 2 9",
+    "7 9",
+    "4 2 9",
+    "3 1 9",
+    "3 2 8",
+    "4 5 3",
+    "10 1",
+    "10",
+    "10",
+    "9",
+    "3",
+    "1 6",
+    "1 8",
+    "1 10",
+    "3 3",
+    "3 1 1 1 3",
+    "15",
+    "8 5",
+    "7",
+    "1 9",
+    "12",
+    "6 4",
+    "8 3",
+    "2 7 3",
+    "2 1 6 3",
+    "4 6 2",
+    "3 6",
+    "9",
+    "7",
+    "3",
+    "4"
+]
+
 var expectedTutorialOutput = [
     "2",
     "2",
@@ -244,16 +288,60 @@ var expectedOutputCat = [
     "1 1 2"
 ]
 
+var expectedOutputDolphin = [
+    "14 4",
+    "1 11 4",
+    "13 2",
+    "1 2 8",
+    "4 8 1",
+    "4 9 2",
+    "4 1 3 2 2",
+    "2 2 2 1 2 2",
+    "1 1 2 2 2",
+    "1 2 2",
+    "1 3",
+    "1 1 3",
+    "2 1 4",
+    "1 1 5",
+    "1 1 6",
+    "1 1 7",
+    "2 8",
+    "4 6",
+    "6 5",
+    "12 5",
+    "3 5 5",
+    "1 6 4",
+    "3 3 3",
+    "9 2 3",
+    "4 1 1 2 1 2",
+    "3 2",
+    "4 2 1",
+    "12 1",
+    "6 3 1",
+    "7 1",
+    "8 1 1",
+    "7 1 1",
+    "6 1 1",
+    "1 3 2 2",
+    "4 4",
+    "2 2 7",
+    "3 8",
+    "3 10",
+    "2 15",
+    "16"
+]
 //var input = inputTutorial
 //var input = inputDog
 //var input = inputMusic
-var input = inputAfrica
+//var input = inputAfrica
 //var input = inputCat
+var input = inputDolphin
 //var exepcted = expectedTutorialOutput
 //var exepcted = expectedOutputDog
 //var exepcted = expectedOutputMusic
-var exepcted = expectedOutputAfrica
+//var exepcted = expectedOutputAfrica
 //var exepcted = expectedOutputCat
+var exepcted = expectedOutputDolphin
 
 @MainActor
 func readLine() -> String? {
@@ -831,21 +919,23 @@ class Grid {
     private func ruleMultipleNumbers(config: Config, size: Int, boxes: [Box]) -> Bool {
         var changed = false
         
-        debug("ruleMultipleNumbers")
+        var print = config.pos == (x:0, y: 8)
+        
+        debug("ruleMultipleNumbers", doPrint: print)
         
         let countOfNumbers = config.numbers.count
         
         guard countOfNumbers > 1 else {
-            debug("ruleMultipleNumbers - no multiple numbers")
+            debug("ruleMultipleNumbers - no multiple numbers", doPrint: print)
             return false
         }
             
-            
-        debug("ruleMultipleNumbers - numbers - \(countOfNumbers)")
+        debug("ruleMultipleNumbers - numbers - \(countOfNumbers)", doPrint: print)
+
         
-        debug("ruleMultipleNumbers - check first fits with first number")
+        debug("ruleMultipleNumbers - check first fits with first number", doPrint: print)
         if let firstEmpty = boxes.firstIndex(where: { $0.state == .empty }), let firstNumber = config.numbers.first, firstEmpty+1 < firstNumber.value {
-            debug("ruleMultipleNumbers - fill boxes empty till first \(firstEmpty+1)")
+            debug("ruleMultipleNumbers - fill boxes empty till first \(firstEmpty+1)", doPrint: print)
             boxes[..<firstEmpty].forEach { box in
                 if box.state == .unknown {
                     box.state = .empty
@@ -854,20 +944,21 @@ class Grid {
                 
             }
         } else {
-            debug("ruleMultipleNumbers - check first nothing to fill")
+            debug("ruleMultipleNumbers - check first nothing to fill", doPrint: print)
         }
         
-        debug("ruleMultipleNumbers - check last fits with last number")
+        debug("ruleMultipleNumbers - check last fits with last number", doPrint: print)
         if let lastEmpty = boxes.lastIndex(where: { $0.state == .empty }), let lastNumber = config.numbers.last, size-(lastEmpty+1) < lastNumber.value {
-            debug("ruleMultipleNumbers - fill boxes empty \(lastEmpty+1) till end")
+            debug("ruleMultipleNumbers - fill boxes empty \(lastEmpty+1) till end", doPrint: print)
             boxes[lastEmpty...].forEach { box in
                 if box.state == .unknown {
+                    debug("box: \(box.pos)", doPrint: print)
                     box.state = .empty
                     changed = true
                 }
             }
         } else {
-            debug("ruleMultipleNumbers - check last nothing to fill")
+            debug("ruleMultipleNumbers - check last nothing to fill", doPrint: print)
         }
         
         for ii in 0..<countOfNumbers {
@@ -878,7 +969,7 @@ class Grid {
                 continue
             }
             
-            debug("ruleMultipleNumbers - check middle for index: \(ii) - value: \(number.value)")
+            debug("ruleMultipleNumbers - check middle for index: \(ii) - value: \(number.value)", doPrint: print)
             
             var from = 1
             if ii > 0 {
@@ -898,7 +989,7 @@ class Grid {
                 }
             }
             
-            debug("ruleMultipleNumbers - from: \(from), to: \(to)")
+            debug("ruleMultipleNumbers - from: \(from), to: \(to)", doPrint: print)
             
             let didChange = ruleFillMiddles(
                 number: number,
@@ -912,15 +1003,15 @@ class Grid {
             }
         }
         
-        debug("ruleMultipleNumbers - fill middles when empty found")
+        debug("ruleMultipleNumbers - fill middles when empty found", doPrint: print)
         if boxes.contains(where: { $0.state == .empty }) {
             
             // check first number
             let firstIndex = boxes.firstIndex(where: { $0.state == .empty})!
             let firstNumber = config.numbers.first!
             if size - (firstIndex+1) < firstNumber.value {
-                debug("ruleMultipleNumbers - fill middles when empty found - match")
-                debug("FirstIndexPos: \(firstIndex+1), number: \(firstNumber.value)")
+                debug("ruleMultipleNumbers - fill middles when empty found - match", doPrint: print)
+                debug("FirstIndexPos: \(firstIndex+1), number: \(firstNumber.value)", doPrint: print)
                 let didChange = ruleFillMiddles(
                     number: firstNumber,
                     from: 1,
@@ -938,8 +1029,8 @@ class Grid {
             let lastIndex = boxes.lastIndex(where: { $0.state == .empty})!
             let lastNumber = config.numbers.last!
             if lastIndex+1 < lastNumber.value {
-                debug("ruleMultipleNumbers - fill middles when empty found - match")
-                debug("LastIndexPos: \(lastIndex+1), number: \(lastNumber.value)")
+                debug("ruleMultipleNumbers - fill middles when empty found - match", doPrint: print)
+                debug("LastIndexPos: \(lastIndex+1), number: \(lastNumber.value)", doPrint: print)
                 let didChange = ruleFillMiddles(
                     number: lastNumber,
                     from: lastIndex + 1,
@@ -954,73 +1045,93 @@ class Grid {
             }
             
         } else {
-            debug("ruleMultipleNumbers - no empty fields")
+            debug("ruleMultipleNumbers - no empty fields", doPrint: print)
         }
         
-        debug("ruleMultipleNumbers - check border fields")
+        debug("ruleMultipleNumbers - check border fields", doPrint: print)
         
         if boxes.contains(where: { $0.state == .filled }) {
             
+            debug("ruleMultipleNumbers - check for only 1 and set emptys")
+            if !config.numbers.contains(where: { $0.value != 1 }) {
+                debug("ruleMultipleNumbers - only 1 ... check if need to set emptys")
+                for i in 0..<boxes.count {
+                    if boxes[i].state == .filled {
+                        if i > 0 {
+                            boxes[i-1].state = .empty
+                        }
+                        if i < size-1 {
+                            boxes[i+1].state = .empty
+                        }
+                    }
+                }
+            }
+            
+            
             let firstIndex = boxes.firstIndex(where: { $0.state == .filled })!
             let lastIndex = boxes.lastIndex(where: { $0.state == .filled })!
-            debug("ruleMultipleNumbers - firstIndexPos: \(firstIndex+1) lastIndexPos: \(lastIndex+1)")
+            debug("ruleMultipleNumbers - firstIndexPos: \(firstIndex+1) lastIndexPos: \(lastIndex+1)", doPrint: print)
             
             var firstNumber = config.numbers.first!
             var lastNumber = config.numbers.last!
-            debug("ruleMultipleNumbers - firstNumber: \(firstNumber.value) lastNumber: \(lastNumber.value)")
+            debug("ruleMultipleNumbers - firstNumber: \(firstNumber.value) lastNumber: \(lastNumber.value)", doPrint: print)
             
             if firstIndex == 0 && boxes[0...firstNumber.value].contains(where: { $0.state == .unknown }) && !firstNumber.fullfilled {
-                debug("ruleMultipleNumbers - hit first border - fill rest")
+                debug("ruleMultipleNumbers - hit first border - fill rest", doPrint: print)
                 boxes[0..<firstNumber.value].forEach({
                     debug("box: \($0.pos) filled")
                     $0.state = .filled
                 })
                 
                 boxes[firstNumber.value].state = .empty
-                debug("box: \(boxes[firstNumber.value].pos) empty")
+                debug("box: \(boxes[firstNumber.value].pos) empty", doPrint: print)
                 firstNumber.fullfilled = true
                 changed = true
             }
             
             if !boxes[0..<firstIndex].contains(where: { $0.state == .unknown }) && !firstNumber.fullfilled {
-                debug("ruleMultipleNumbers - hit first border - fill rest - borde was an empty")
+                debug("ruleMultipleNumbers - hit first border - fill rest - borde was an empty", doPrint: print)
                 boxes[firstIndex..<(firstNumber.value+firstIndex-1)].forEach({
                     debug("box: \($0.pos) filled")
                     $0.state = .filled
                 })
                 boxes[firstIndex+firstNumber.value].state = .empty
-                debug("box: \(boxes[firstIndex+firstNumber.value].pos) empty")
+                debug("box: \(boxes[firstIndex+firstNumber.value].pos) empty", doPrint: print)
                 firstNumber.fullfilled = true
                 changed = true
             }
             
             if lastIndex == size-1 && boxes[(size-lastNumber.value-1)...].contains(where: { $0.state == .unknown }) && !lastNumber.fullfilled {
                 // ruleMultipleNumbers - firstIndexPos: 4 lastIndexPos: 10
-                debug("ruleMultipleNumbers - hit last border - fill rest")
+                debug("ruleMultipleNumbers - hit last border - fill rest", doPrint: print)
                 boxes[(size-lastNumber.value)...].forEach({
                     debug("box: \($0.pos) filled")
                     $0.state = .filled
                 })
                 boxes[size-lastNumber.value-1].state = .empty
-                debug("box: \(boxes[size-lastNumber.value-1].pos) empty")
+                debug("box: \(boxes[size-lastNumber.value-1].pos) empty", doPrint: print)
                 lastNumber.fullfilled = true
                 changed = true
             }
             
+//            var boxesAfetLast = boxes[lastIndex...]
+//            
+//            boxesAfetLast.forEach { box in
+//                debug("box after last: \(box.pos), state: \(box.state)", doPrint: print)
+//            }
+//            
             if !boxes[lastIndex...].contains(where: { $0.state == .unknown }) && !lastNumber.fullfilled {
-                debug("ruleMultipleNumbers - hit last border - fill rest - borde was an empty")
-                boxes[lastIndex-lastNumber.value-1..<lastIndex].forEach({
-                    debug("box: \($0.pos) filled")
+                debug("ruleMultipleNumbers - hit last border - fill rest - borde was an empty", doPrint: print)
+                boxes[lastIndex-(lastNumber.value-1)..<lastIndex].forEach({
+                    debug("box: \($0.pos) filled", doPrint: print)
                     $0.state = .filled
                 })
                 boxes[lastIndex-lastNumber.value].state = .empty
-                debug("box: \(boxes[lastIndex-lastNumber.value].pos) empty")
+                debug("box: \(boxes[lastIndex-lastNumber.value].pos) empty", doPrint: print)
                 lastNumber.fullfilled = true
                 changed = true
             }
             
-    
-            var print = config.pos == (x:0, y: 3)
             
             debug("ruleMultipleNumbers - check first filled if can be raised", doPrint: print)
             
@@ -1112,7 +1223,7 @@ class Grid {
                 }
             }
             
-            debug("ruleMultipleNumbers - boxGroups: \(boxGroups)", doPrint: print)
+            debug("ruleMultipleNumbers - boxGroups: \(boxGroups), config: \(config.description)", doPrint: print)
             
             if boxGroups.count == config.numbers.count {
                 debug("ruleMultipleNumbers - boxGroups equals numbers", doPrint: print)
@@ -1120,6 +1231,7 @@ class Grid {
                     let boxIndexes = boxGroups[i]
                     
                     if boxIndexes.count == config.numbers[i].value {
+                        debug("ruleMultipleNumbers - boxGroups \(i) same amount of numbers", doPrint: print)
                         if let firstIndex = boxIndexes.first, firstIndex-1 >= 0 {
                             boxes[firstIndex-1].state = .empty
                         }
@@ -1127,6 +1239,67 @@ class Grid {
                         if let lastIndex = boxIndexes.last, lastIndex+1 < size {
                             boxes[lastIndex+1].state = .empty
                         }
+                        
+                        if !config.numbers[i].fullfilled {
+                            config.numbers[i].fullfilled = true
+                            changed = true
+                        }
+                        
+                        continue
+                    }
+                    
+                        
+                    debug("ruleMultipleNumbers - boxGroups \(i) not same amount of numbers - check for emptys", doPrint: print)
+                    
+                    if i > 0 {
+                        
+                        
+                        let lastIndex = boxGroups[i-1].last!
+                        debug("ruleMultipleNumbers - lastIndex from group before: \(lastIndex), i from current: \(i)", doPrint: print)
+                        debug("ruleMultipleNumbers - check possible", doPrint: print)
+                        if boxes[lastIndex+1].state == .empty {
+                            debug("ruleMultipleNumbers - boxGroup last is end. check diff to next", doPrint: print)
+                            
+                            var number = config.numbers[i]
+                            let neededEmptys = number.value - boxIndexes.count
+                            let currentFirstIndex = boxIndexes.first!
+                            let from = lastIndex+2
+                            let to = currentFirstIndex-neededEmptys
+                            debug("ruleMultipleNumbers - check \(from) to \(to)", doPrint: print)
+                            guard from <= to else {
+                                debug("ruleMultipleNumbers - skip", doPrint: print)
+                                continue
+                            }
+                            
+                            boxes[from..<to].forEach { box in
+                                if box.state == .unknown {
+                                    debug("box :\(box.pos) - set empty", doPrint: print)
+                                    box.state = .empty
+                                    changed = true
+                                }
+                                
+                            }
+                        }
+                    }
+                    
+                    // check middles
+                    debug("ruleMultipleNumbers - check middles", doPrint: print)
+                    let firstFilled = boxIndexes.first!
+                    let lastFilled = boxIndexes.last!
+                    
+                    let from = boxes[0...firstFilled].lastIndex(where: { $0.state == .empty }) ?? 0
+                    let to = boxes[lastFilled...].firstIndex(where: { $0.state == .empty }) ?? size
+                    
+                    let didChange = ruleFillMiddles(
+                        number: config.numbers[i],
+                        from: from == 0 ? from+1: from+2,
+                        to: to,
+                        boxes: boxes,
+                        doPrint: print
+                    )
+                    
+                    if didChange {
+                        changed = true
                     }
                 }
             }
@@ -1142,11 +1315,15 @@ class Grid {
     }
     
     private func ruleCheckDone(config: Config, boxes: [Box]) -> Bool {
-        debug("ruleCheckDone")
+        var print = false // config.pos == (x: 4, y: 0)
+        
+        debug("ruleCheckDone - config \(config.description)", doPrint: print)
         
         var changed = false
-        if boxes.filter({ $0.state == .filled }).count == config.numbersSize {
-            debug("ruleCheckDone - all filled -> fill emptys")
+        let filledBoxes = boxes.filter({ $0.state == .filled }).count
+        debug("ruleCheckDone - filled: \(filledBoxes), numberSize: \(config.numbersSize)", doPrint: print)
+        if filledBoxes == config.numbersSize {
+            debug("ruleCheckDone - all filled -> fill emptys", doPrint: print)
             for box in boxes.filter({$0.state == .unknown}) {
                 box.state = .empty
             }
@@ -1155,7 +1332,7 @@ class Grid {
         }
         
         if boxes.filter({ $0.state != .empty }).count == config.numbersSize {
-            debug("ruleCheckDone - all filled -> fill emptys")
+            debug("ruleCheckDone - all filled -> fill emptys", doPrint: print)
             for box in boxes.filter({$0.state == .unknown}) {
                 box.state = .filled
             }
@@ -1175,12 +1352,10 @@ class Grid {
             for i in 0..<configs.count {
                 var config = configs[i]
                 
-                debug("check: \(i) -> \(config.description)")
+                var print = false // config.pos == (x: 4, y: 0)
+                
+                debug("check: \(i) -> \(config.description)", doPrint: print)
 
-                guard !config.fullfilled else {
-                    debug("already done")
-                    continue
-                }
                 
                 var configBoxes = [Box]()
                 var sizeForRule = 0
@@ -1194,33 +1369,39 @@ class Grid {
                     configBoxes = boxes.filter { $0.pos.x == config.pos.x }
                     sizeForRule = height
                 }
+                
+                guard !config.fullfilled || configBoxes.contains(where: { $0.state == .unknown }) else {
+                    debug("already done", doPrint: print)
+                    continue
+                }
+                
                                 
                 guard !ruleFillAll(config: config, size: sizeForRule, boxes: configBoxes) else {
-                    debug("ruleFillAll -> changed and continue")
+                    debug("ruleFillAll -> changed and continue", doPrint: print)
                     changed = true
                     continue
                 }
                 
                 guard !ruleMultipleNumbersFillAll(config: config, size: sizeForRule, boxes: configBoxes) else {
-                    debug("ruleMultipleNumbersFillAll -> changed and continue")
+                    debug("ruleMultipleNumbersFillAll -> changed and continue", doPrint: print)
                     changed = true
                     continue
                 }
                 
                 guard !ruleCheckDone(config: config, boxes: configBoxes) else {
-                    debug("ruleCheckDone -> changed and continue")
+                    debug("ruleCheckDone -> changed and continue", doPrint: print)
                     changed = true
                     continue
                 }
                 
                 guard !ruleOneNumber(config: config, size: sizeForRule, boxes: configBoxes) else {
-                    debug("ruleOneNumber -> changed and continue")
+                    debug("ruleOneNumber -> changed and continue", doPrint: print)
                     changed = true
                     continue
                 }
                 
                 guard !ruleMultipleNumbers(config: config, size: sizeForRule, boxes: configBoxes) else {
-                    debug("ruleMultipleNumbers -> changed and continue")
+                    debug("ruleMultipleNumbers -> changed and continue", doPrint: print)
                     changed = true
                     continue
                 }
@@ -1256,19 +1437,8 @@ var finalOutput = grid.printWhites()
 finalOutput.forEach {
     print($0)
 }
-//
-//if width > 0 {
-//    for i in 0...(width-1) {
-//
-//        // Write an answer using print("message...")
-//        // To debug: print("Debug messages...", to: &errStream)
-//
-//        let output = ""
-//        finalOutput.append(output)
-//        print(output)
-//        
-//    }
-//}
+
+// END
 
 print(exepcted == finalOutput)
 

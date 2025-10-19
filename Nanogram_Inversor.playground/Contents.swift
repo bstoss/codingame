@@ -336,18 +336,18 @@ var expectedOutputDolphin = [
 //var input = inputTutorial
 //var exepcted = expectedTutorialOutput
 
-//var input = inputDog
-//var exepcted = expectedOutputDog
+var input = inputDog
+var exepcted = expectedOutputDog
 
 //var input = inputMusic
 //var exepcted = expectedOutputMusic
 
 //var input = inputAfrica
 //var exepcted = expectedOutputAfrica
-
-var input = inputCat
-var exepcted = expectedOutputCat
-//
+////
+//var input = inputCat
+//var exepcted = expectedOutputCat
+////
 //var input = inputDolphin
 //var exepcted = expectedOutputDolphin
 
@@ -424,32 +424,30 @@ func readLine() -> String? {
              
              
              
-             |   |   |   |   |   |   |   |   |   |   |   |   | 1 |   |   |
-             |   |   |   |   |   |   |   |   |   |   | 3 | 2 | 2 | 1 | 1 |
              |   |   |   |   |   |   |   | 4 |   |   | 2 | 3 | 3 | 8 | 2 |
              | 2 | 4 |   | 6 |   | 2 | 14| 7 | 3 | 7 | 4 | 3 | 2 | 1 | 2 |
              | 6 | 6 | 7 | 9 | 6 | 12| 1 | 2 | 8 | 6 | 1 | 1 | 2 | 1 | 2 |
              | 3 | 1 | 1 | 1 | 12| 2 | 1 | 2 | 3 | 4 | 2 | 1 | 2 | 3 | 2 |
-     1 1 1 1 |   | · | · |   |   |   |   |   | · | ■ | · |   |   |   |   |
-     2 2 1 1 |   | · | · | ■ | ■ | · |   |   |   | ■ |   |   |   |   |   |
+     1 1 1 1 | · | · | · |   |   | · | · | · | · | ■ | · |   |   |   |   |
+     2 2 1 1 | · | · | · | ■ | ■ | · | · | · | ■ | ■ | · |   |   |   |   |
        7 2 1 | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · |   |   |   |   |
          8 3 | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ |
-     2 2 2 1 |   |   | · | ■ | ■ | · | ■ |   |   | ■ |   |   | · | ■ | · |
-       1 8 1 |   |   |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ |   |   |   | ■ |   |
-     2 3 2 3 |   |   |   |   |   | ■ | ■ |   |   | ■ |   |   | ■ | ■ |   |
-       1 4 4 |   |   |   |   |   | ■ | ■ | ■ |   | · |   | ■ | ■ | ■ |   |
-         1 10|   |   |   |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |   | ■ |   |
+     2 2 2 1 | · | · | · | ■ | ■ | · | ■ | ■ | · | ■ | ■ | · | · | ■ | · |
+       1 8 1 |   |   |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |   |   | ■ |   |
+     2 3 2 3 |   |   |   |   |   | ■ | ■ | · | ■ | ■ | · |   | ■ | ■ |   |
+       1 4 4 |   |   |   |   |   | ■ | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ |
+         1 10|   |   |   |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |   |
        2 9 1 | ■ | ■ | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | · |
-       1 8 1 |   |   |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ |   |   |   |   |   |
+       1 8 1 |   |   |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · |   |   |   |   |
          1 9 |   |   |   | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |   |   |   |   |
          113 | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ |
        8 4 1 | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ | ■ | · | ■ |
-       7 2 1 |   |   | ■ | ■ | ■ | ■ | ■ |   |   | · |   |   |   |   |   |
-       7 2 1 |   |   | ■ | ■ | ■ | ■ | ■ |   |   |   |   |   |   |   |   |
-       5 4 3 |   | ■ | ■ | ■ | ■ |   |   | ■ | ■ | ■ |   |   | ■ | ■ |   |
- 2 2 1 2 1 1 |   | ■ |   |   | ■ | · |   | · |   | ■ |   |   | · | ■ |   |
+       7 2 1 | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · | ■ | ■ |   |   |   |
+       7 2 1 | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · |   | · | · |   |   |   |
+       5 4 3 | · | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ |
+ 2 2 1 2 1 1 |   | ■ |   |   | ■ | · | ■ | · | ■ | ■ | · |   | · | ■ |   |
    1 1 2 4 2 |   |   |   |   | ■ | ■ | · | ■ | ■ | ■ | ■ | · | ■ | ■ |   |
-       2 5 4 |   |   |   |   |   | ■ | ■ | ■ |   |   |   | ■ | ■ |   |   |
+       2 5 4 |   |   |   |   |   | ■ | ■ | ■ | · |   | ■ | ■ | ■ |   |   |
              
              |   |   |   |   |   |   |   |   |   |   |   |   | 1 |   |   |
              |   |   |   |   |   |   |   |   |   |   | 3 | 2 | 2 | 1 | 1 |
@@ -457,27 +455,52 @@ func readLine() -> String? {
              | 2 | 4 |   | 6 |   | 2 | 14| 7 | 3 | 7 | 4 | 3 | 2 | 1 | 2 |
              | 6 | 6 | 7 | 9 | 6 | 12| 1 | 2 | 8 | 6 | 1 | 1 | 2 | 1 | 2 |
              | 3 | 1 | 1 | 1 | 12| 2 | 1 | 2 | 3 | 4 | 2 | 1 | 2 | 3 | 2 |
-               . | . | . | ■ | . | . | . | . | . | ■ | . | . | ■ | . | ■ |
-               . | . | . | ■ | ■ | . | . | . | ■ | ■ | . | ■ | . | ■ | . |
-               . | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | . | ■ |
-               . | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ |
-               . | . | . | ■ | ■ | . | ■ | ■ | . | ■ | ■ | . | . | ■ | . |
-               ■ | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | ■ | . |
-               ■ | ■ | . | . | ■ | ■ | ■ | . | ■ | ■ | . | . | ■ | ■ | ■ |
-               . | ■ | . | . | . | ■ | ■ | ■ | ■ | . | . | ■ | ■ | ■ | ■ |
-               . | ■ | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . |
-               ■ | ■ | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | . |
-               ■ | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | ■ | . |
-               ■ | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | . |
-               ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ |
-               ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ | ■ | . | ■ |
-               ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | ■ | ■ | . | ■ | . |
-               . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | ■ | ■ | . | ■ |
-               . | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ |
-               ■ | ■ | . | ■ | ■ | . | ■ | . | ■ | ■ | . | ■ | . | ■ | . |
-               ■ | . | ■ | . | ■ | ■ | . | ■ | ■ | ■ | ■ | . | ■ | ■ | . |
-               ■ | ■ | . | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ | ■ | . | . |
+     1 1 1 1 | . | . | . | ■ | . | . | . | . | . | ■ | . | . | ■ | . | ■ |
+     2 2 1 1 | . | . | . | ■ | ■ | . | . | . | ■ | ■ | . | ■ | . | ■ | . |
+       7 2 1 | . | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | . | ■ |
+         8 3 | . | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ |
+     2 2 2 1 | . | . | . | ■ | ■ | . | ■ | ■ | . | ■ | ■ | . | . | ■ | . |
+       1 8 1 | ■ | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | ■ | . |
+     2 3 2 3 | ■ | ■ | . | . | ■ | ■ | ■ | . | ■ | ■ | . | . | ■ | ■ | ■ |
+       1 4 4 | . | ■ | . | . | . | ■ | ■ | ■ | ■ | . | . | ■ | ■ | ■ | ■ |
+         1 10| . | ■ | . | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . |
+       2 9 1 | ■ | ■ | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | . |
+       1 8 1 | ■ | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | ■ | . |
+         1 9 | ■ | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | . |
+         113 | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ |
+       8 4 1 | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ | ■ | . | ■ |
+       7 2 1 | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | ■ | ■ | . | ■ | . |
+       7 2 1 | . | ■ | ■ | ■ | ■ | ■ | ■ | ■ | . | . | . | ■ | ■ | . | ■ |
+       5 4 3 | . | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ |
+ 2 2 1 2 1 1 | ■ | ■ | . | ■ | ■ | . | ■ | . | ■ | ■ | . | ■ | . | ■ | . |
+   1 1 2 4 2 | ■ | . | ■ | . | ■ | ■ | . | ■ | ■ | ■ | ■ | . | ■ | ■ | . |
+       2 5 4 | ■ | ■ | . | ■ | ■ | ■ | ■ | ■ | . | ■ | ■ | ■ | ■ | . | . |
              
+             |   |   |   |   |   |   |   | 1 |   |   |   |   |   |   |   |   |   |   |   |   |
+             |   |   |   | 1 |   |   | 3 | 2 | 2 |   |   |   |   |   |   |   |   |   |   |   |
+             |   | 1 |   | 1 |   |   | 1 | 1 | 3 | 4 |   | 4 | 3 | 3 | 4 |   |   |   |   |   |
+             | 1 | 2 | 3 | 1 | 3 | 3 | 2 | 2 | 3 | 2 | 7 | 2 | 1 | 2 |^5 | 10|   |   |   |   |
+             | 1 | 1 | 2 | 6 | 4 | 2 | 2 | 3 | 4 | 9 | 9 | 9 |^9 | 8 | 3 | 1 | 10| 10| 9 | 3 |
+             | · | · | · | ■ | · | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · | · | · |
+             | · | ■ | · | · | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · | · |
+             | · | · | · | ■ | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · |
+             | · | · | · | · | · | · | · | · | · | ■ | ■ | ■ | · | · | ■ | ■ | ■ | · | · | · |
+             | · | · | · | · | ■ | ■ | ■ | · | ■ | · | ■ | · | · | ■ | · | ■ | ■ | ■ | · | · |
+             | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | · |
+             | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ | ■ | · |
+             | · | · | · | · | · | · | · | · | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · |
+             | · | · | · | · | · | · | ■ | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · |
+             | · | · | · | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · |
+             | · | · | · | · | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ | ■ | · |
+             | · | · | · | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ | · |
+             | · | · | · | · | · | · | ■ | ■ | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | ■ | ■ | ■ |
+             | · | ■ | ■ | · | · | · | ■ | · | · | ■ | ■ | ■ | ■ | ■ | ■ | · | · | ■ | ■ | ■ |
+             | ■ | ■ | ■ | ■ | · | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · | · | ■ | ■ |
+             | · | · | ■ | ■ | ■ | · | · | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · | · | · | · | · |
+             | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · | · | · | · | · | · |
+             | · | · | · | ■ | ■ | ■ | ■ | ■ | ■ | ■ | · | · | · | · | · | · | · | · | · | · |
+             | · | · | ■ | ■ | ■ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+             | ■ | ■ | ■ | ■ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
              
              
             */
@@ -505,6 +528,7 @@ typealias Pos = (x: Int, y: Int)
 class Number {
     let value: Int
     var fullfilled: Bool = false
+    var fullfills: [Int] = []
     
     init(value: Int) {
         self.value = value
@@ -594,8 +618,6 @@ class Grid {
     // MARK: - Grid Methods
     
     func printBoard() {
-        
-        
         let confYAllNumbers = configs.filter { $0.pos.y == 0 }
         var topLine: String = ""
         
@@ -607,15 +629,17 @@ class Grid {
         var maxXCount = sortedForXMax.first!.numbers.count
         
         for k in 0..<maxYCount {
-            topLine += (0..<maxXCount).map({ _ in " " }).joined(separator: " ") + " |"
+            topLine += (0..<maxXCount).map({ _ in "  " }).joined(separator: " ") + " |"
             for config in confYAllNumbers {
                 
                 let count = config.numbers.count
                 if count < maxYCount - k {
                     topLine += "   |"
                 } else {
-                    let value = config.numbers[count-(maxYCount-k)].value
-                    topLine += " \(value)\(value > 9 ? "":" ")|"
+                    let number = config.numbers[count-(maxYCount-k)]
+                    let value = number.value
+                    
+                    topLine += "\(number.fullfilled ? "^":" ")\(value)\(value > 9 ? "":" ")|"
                 }
             }
             debug(topLine, doPrint: true)
@@ -632,10 +656,10 @@ class Grid {
                     for k in 0..<maxXCount {
                         let count = config.numbers.count
                         if count < maxXCount - k {
-                            row += "  "
+                            row += "   "
                         } else {
-                            let value = config.numbers[count-(maxXCount-k)].value
-                            row += "\(value)\(value > 9 ? "" : " ")"
+                            let number = config.numbers[count-(maxXCount-k)]
+                            row += "\(number.fullfilled ? "^":" ")\(number.value)\(number.value > 9 ? "" : " ")"
                         }
                     }
                     row += "|"
@@ -914,8 +938,9 @@ class Grid {
             // use j - 1
             if j > 0 && (j-1) < boxes.count {
                 var box = boxes[j-1]
-                debug("box \(box.pos)", doPrint: doPrint)
+                debug("box state : \(box.state)", doPrint: doPrint)
                 if box.state == .unknown {
+                    debug("box \(box.pos)", doPrint: doPrint)
                     box.state = .filled
                     changed = true
                 }
@@ -925,6 +950,7 @@ class Grid {
         
         if outers == 0 {
             number.fullfilled = true
+            number.fullfills = ((lower-1)..<upper).map { Int($0) }
         }
                 
         return changed
@@ -933,7 +959,7 @@ class Grid {
     private func ruleMultipleNumbers(config: Config, size: Int, boxes: [Box]) -> Bool {
         var changed = false
         
-        var print = config.pos == (x:7, y: 0)
+        var print = false // config.pos == (x: 7, y: 0) // check for hier war ich
         
         if print {
             printBoard()
@@ -950,50 +976,60 @@ class Grid {
             
         debug("ruleMultipleNumbers - numbers - \(countOfNumbers)", doPrint: print)
 
-        
-        
         // MARK: -- middles for all numbers
-        for ii in 0..<countOfNumbers {
-            // search for middles?
-            var number = config.numbers[ii]
-            
-            guard !number.fullfilled else {
-                continue
-            }
-            
-            debug("ruleMultipleNumbers - check middle for index: \(ii) - value: \(number.value)", doPrint: print)
-            
-            var from = 1
-            if ii > 0 {
-                // add unfree space from numbers befor index
-                for j in 0..<ii {
-                    from += 1
-                    from += config.numbers[j].value
-                }
-            }
-            
-            var to = size
-            if ii+1 < countOfNumbers {
-                // add unfree space from numbers after index
-                for j in ii+1..<countOfNumbers {
-                    to -= 1
-                    to -= config.numbers[j].value
-                }
-            }
-            
-            debug("ruleMultipleNumbers - from: \(from), to: \(to)", doPrint: print)
-            
-            let didChange = ruleFillMiddles(
-                number: number,
-                from: from,
-                to: to,
-                boxes: boxes
-            )
-            
-            if didChange {
-                changed = true
-            }
+        let didChange = ruleFillMiddles(
+            forMultipleNumbers: config.numbers,
+            initialFrom: 0,
+            initialTo: size-1,
+            boxes: boxes,
+            doPrint: print
+        )
+        if didChange {
+            changed = true
         }
+        
+//
+//        for ii in 0..<countOfNumbers {
+//            // search for middles?
+//            var number = config.numbers[ii]
+//            
+//            guard !number.fullfilled else {
+//                continue
+//            }
+//            
+//            debug("ruleMultipleNumbers - check middle for index: \(ii) - value: \(number.value)", doPrint: print)
+//            
+//            var from = 1
+//            if ii > 0 {
+//                // add unfree space from numbers befor index
+//                for j in 0..<ii {
+//                    from += 1
+//                    from += config.numbers[j].value
+//                }
+//            }
+//            
+//            var to = size
+//            if ii+1 < countOfNumbers {
+//                // add unfree space from numbers after index
+//                for j in ii+1..<countOfNumbers {
+//                    to -= 1
+//                    to -= config.numbers[j].value
+//                }
+//            }
+//            
+//            debug("ruleMultipleNumbers - from: \(from), to: \(to)", doPrint: print)
+//            
+//            let didChange = ruleFillMiddles(
+//                number: number,
+//                from: from,
+//                to: to,
+//                boxes: boxes
+//            )
+//            
+//            if didChange {
+//                changed = true
+//            }
+//        }
         
         // MARK: -- checks when emptys there
         debug("ruleMultipleNumbers - fill middles when empty found", doPrint: print)
@@ -1013,7 +1049,7 @@ class Grid {
              2 1 | · | · |   |   |   |   |   |   |   |
              */
             debug("ruleMultipleNumbers - check first fits with first number", doPrint: print)
-            if firstIndex+1 < firstNumber.value {
+            if firstIndex+1 <= firstNumber.value {
                 debug("ruleMultipleNumbers - fill boxes empty till first \(firstIndex+1)", doPrint: print)
                 boxes[..<firstIndex].forEach { box in
                     if box.state == .unknown {
@@ -1125,7 +1161,7 @@ class Grid {
                     }
                 }
             }
-           
+            
             let firstIndex = boxes.firstIndex(where: { $0.state == .filled })!
             let lastIndex = boxes.lastIndex(where: { $0.state == .filled })!
             debug("ruleMultipleNumbers - firstIndexPos: \(firstIndex+1) lastIndexPos: \(lastIndex+1)", doPrint: print)
@@ -1143,14 +1179,15 @@ class Grid {
              */
             if firstIndex == 0 && !firstNumber.fullfilled {
                 debug("ruleMultipleNumbers - hit first border - fill rest", doPrint: print)
-                boxes[0..<firstNumber.value].forEach({
-                    debug("box: \($0.pos) filled")
-                    $0.state = .filled
+                boxes[0..<firstNumber.value].forEach({ box in
+                    debug("box: \(box.pos) filled")
+                    box.state = .filled
                 })
                 
                 boxes[firstNumber.value].state = .empty
                 debug("box: \(boxes[firstNumber.value].pos) empty", doPrint: print)
                 firstNumber.fullfilled = true
+                firstNumber.fullfills = (0..<firstNumber.value).map { Int($0) }
                 changed = true
             }
             
@@ -1169,6 +1206,7 @@ class Grid {
                 boxes[firstIndex+firstNumber.value].state = .empty
                 debug("box: \(boxes[firstIndex+firstNumber.value].pos) empty", doPrint: print)
                 firstNumber.fullfilled = true
+                firstNumber.fullfills = (firstIndex..<(firstNumber.value+firstIndex-1)).map { Int($0) }
                 changed = true
             }
             
@@ -1188,6 +1226,7 @@ class Grid {
                 boxes[size-lastNumber.value-1].state = .empty
                 debug("box: \(boxes[size-lastNumber.value-1].pos) empty", doPrint: print)
                 lastNumber.fullfilled = true
+                lastNumber.fullfills = (size-lastNumber.value...size-1).map { Int($0) }
                 changed = true
             }
             
@@ -1206,6 +1245,7 @@ class Grid {
                 boxes[lastIndex-lastNumber.value].state = .empty
                 debug("box: \(boxes[lastIndex-lastNumber.value].pos) empty", doPrint: print)
                 lastNumber.fullfilled = true
+                lastNumber.fullfills = (lastIndex-(lastNumber.value-1)..<lastIndex).map { Int($0) }
                 changed = true
             }
             
@@ -1219,16 +1259,13 @@ class Grid {
             
             let firstEmptyBoyAfterLastEmptyBox = boxes[(lastEmptyBoxFromFirstIndex+1)...].firstIndex(where: { $0.state == .empty }) ?? size-1
             debug("ruleMultipleNumbers - firstEmptyBoyAfterLastEmptyBox: \(firstEmptyBoyAfterLastEmptyBox+1)", doPrint: print)
-
-            // MARK: --- filled from first empty or border unknowns still less than number
+            
+            // MARK: --- fills Middle from first empty to next if its sure that before is not enough space
             /*
-             4 1 |   |   | ■ |   |   |   |   |   |   |
+             4 1 |   | · |   | ■ |   |   |   | · |   |
              -
-             4 1 |   |   | ■ | ■ |   |   |   |   |   |
-             
-             4 1 | · |   | ■ |   |   |   |   |   |   |
-             -
-             4 1 | · |   | ■ | ■ | ■ |   |   |   |   |
+             4 1 |   | · |   | ■ | ■ | ■ |   | · |   |  -> first cannot be happen here, because already check with rule above
+             4 1 | · | · |   | ■ | ■ | ■ |   | · |   |
              */
             if boxes[0..<lastEmptyBoxFromFirstIndex].filter({ $0.state == .unknown }).count < firstNumber.value &&
                 (lastEmptyBoxFromFirstIndex > 0 || firstEmptyBoyAfterLastEmptyBox < size-1) {
@@ -1240,11 +1277,40 @@ class Grid {
                     boxes: boxes,
                     doPrint: print
                 )
+                
                 if didChange {
                     changed = true
                 }
+                
+                
             }
             
+            // MARK: --- fills next if not on board but counts
+            /*
+             4 1 | · | · |   | ■ |   |   |   |   |   |
+             -
+             4 1 | · | · |   | ■ | ■ | ■ |   |   |   |
+             */
+            debug("ruleMultipleNumbers - fill rest if diff to border allows from first", doPrint: print)
+            let maxIndexToFill = lastEmptyBoxFromFirstIndex + firstNumber.value - 1
+            if maxIndexToFill > firstIndex {
+                debug("ruleMultipleNumbers - fill rest if diff to border allows - fromPos \(firstIndex+1) toPos \(maxIndexToFill+1)", doPrint: print)
+                boxes[firstIndex..<maxIndexToFill].forEach { box in
+                    if box.state == .unknown {
+                        box.state = .filled
+                        changed = true
+                        debug("box \(box.pos) filled", doPrint: print)
+                    }
+                }
+            }
+            
+            // MARK: --- fills Middle from empty before last empty to next if its sure that after is not enough space
+            /*
+             1 4 |   | · |   |   |   | ■ |   | · |   |
+             -
+             1 4 |   | · |   | ■ | ■ | ■ |   | · |   |  -> first cannot be happen here, because already check with rule above
+             1 4 |   | · |   | ■ | ■ | ■ |   | · | · |
+             */
             if lastIndex > firstIndex {
                 
                 let firstEmptyBoxFromLastIndex = boxes[lastIndex...].firstIndex(where: { $0.state == .empty }) ?? size-1
@@ -1265,35 +1331,32 @@ class Grid {
                     if didChange {
                         changed = true
                     }
+                    
                 }
+                
+                // MARK: --- fills next if not on board but counts
+                /*
+                 1 4 |   |   |   |   |   | ■ |   | · | · |
+                 -
+                 1 4 |   |   |   | ■ | ■ | ■ |   | · | · |
+                 */
+                debug("ruleMultipleNumbers - fill rest if diff to border allows from last", doPrint: print)
+                let maxIndexToFill = firstEmptyBoxFromLastIndex - lastNumber.value + 1
+                if maxIndexToFill < lastIndex {
+                    debug("ruleMultipleNumbers - fill rest if diff to border allows - fromPos \(maxIndexToFill+1) toPos \(lastIndex+1)", doPrint: print)
+                    boxes[maxIndexToFill..<lastIndex].forEach { box in
+                        if box.state == .unknown {
+                            box.state = .filled
+                            changed = true
+                            debug("box \(box.pos) filled", doPrint: print)
+                        }
+                    }
+                }
+                
+                
             }
             
-            
-//            if firstIndex+1 <= firstNumber.value, !firstNumber.fullfilled {
-//                debug("ruleMultipleNumbers - first filled is smaller than first number", doPrint: print)
-//                boxes[firstIndex..<firstNumber.value].forEach { box in
-//                    if box.state != .filled {
-//                        debug("box \(box.pos) filled", doPrint: print)
-//                        box.state = .filled
-//                        changed = true
-//                    }
-//                }
-//                
-//                if boxes[firstIndex..<firstNumber.value].filter({ $0.state == .filled }).count == firstNumber.value {
-//                    debug("FirstNumber \(firstNumber.fullfilled) fillfilled", doPrint: print)
-//                    firstNumber.fullfilled = true
-//                    
-//                    boxes[0..<firstIndex].forEach { box in
-//                        debug("box \(box.pos) empty", doPrint: print)
-//                        box.state = .empty
-//                    }
-//    
-//                    boxes[firstNumber.value].state = .empty
-//                }
-//
-//            } else {
-//                debug("ruleMultipleNumbers - not raised", doPrint: print)
-//            }
+            // MARK: --- Box Groups filled
             
             debug("ruleMultipleNumbers - check if numbers done and set emptys on edge", doPrint: print)
             
@@ -1303,14 +1366,14 @@ class Grid {
             var boxGroups = [[Int]]()
             var i = 0
             boxes.indices.forEach { index in
-                debug("\(index) \(i)", doPrint: print)
+                //debug("\(index) \(i)", doPrint: print)
                 if boxes[index].state == .filled {
                     if boxGroups.count == i {
                         boxGroups.append([index])
                     } else {
                         boxGroups[i].append(index)
                     }
-                } else if boxes[index].state == .empty {
+                } else {
                     if boxGroups.count > i {
                         i += 1
                     }
@@ -1357,34 +1420,25 @@ class Grid {
                         
                         if !number.fullfilled {
                             number.fullfilled = true
+                            number.fullfills = boxIndexes
                             changed = true
                         }
                         
                         continue
-                    } else {
-                        debug("ruleMultipleNumbers - boxGroups \(i) not same amount of numbers", doPrint: print)
+                    }
+                    debug("ruleMultipleNumbers - boxGroups \(i) not same amount \(boxIndexes.count) as number \(number.value)", doPrint: print)
+                    
+                    if i == 0 {
+                        debug("ruleMultipleNumbers - check for unkowns in the beginning", doPrint: print)
                         
-                        if i == 0 {
-                            debug("ruleMultipleNumbers - check for unkowns in the beginning", doPrint: print)
-                            
-                            let outers = number.value - boxIndexes.count
-                            let checkTillIndex = boxIndexes.first!-outers
-                            if checkTillIndex > 0 {
-                                boxes[0..<checkTillIndex].forEach { box in
-                                    if box.state == .unknown {
-                                        debug("ruleMultipleNumbers - set box \(box.pos) empty", doPrint: print)
-                                        box.state = .empty
-                                        changed = true
-                                    }
-                                }
-                            }
-                            
-                        }
-                        if i == config.numbers.count-1 {
-                            debug("ruleMultipleNumbers - check for unknowns in the end", doPrint: print)
-                            
-                            let outers = number.value - boxIndexes.count
-                            boxes[(boxIndexes.last!+outers+1)...].forEach { box in
+                        let outers = number.value - boxIndexes.count
+                        let checkTillIndex = boxIndexes.first!-outers
+                        let lastIndex = boxIndexes.last!
+                        let nextBoxesIndexes = boxGroups[i+1]
+                        let stillPossibleMergeGroupCount = boxIndexes.count + nextBoxesIndexes.count + (lastIndex - nextBoxesIndexes.first!)
+                        
+                        if checkTillIndex > 0  && stillPossibleMergeGroupCount > number.value {
+                            boxes[0..<checkTillIndex].forEach { box in
                                 if box.state == .unknown {
                                     debug("ruleMultipleNumbers - set box \(box.pos) empty", doPrint: print)
                                     box.state = .empty
@@ -1393,9 +1447,43 @@ class Grid {
                             }
                         }
                         
+                        debug("ruleMultipleNumbers - check validity to next indexes", doPrint: print)
+                        
+                        /*
+                         2 4 |   | ■ |   | ■ | ■ | ■ |   |   |   |
+                         */
+                        
+                        
+                        if lastIndex+outers+1 == nextBoxesIndexes.first!, boxes[lastIndex+outers].state == .unknown, stillPossibleMergeGroupCount < number.value {
+                            debug("ruleMultipleNumbers - check validity to next indexes - box set to empty", doPrint: print)
+                            boxes[lastIndex+outers].state = .empty
+                            changed = true
+                        }
+                        
+                    }
+                    if i == config.numbers.count-1 {
+                        debug("ruleMultipleNumbers - check for unknowns in the end", doPrint: print)
+                        
+                        let outers = number.value - boxIndexes.count
+                        let checkFromIndex = boxIndexes.last!+outers+1
+                        let earlierBoxesIndexes = boxGroups[i-1]
+                        
+                        let stillPossibleMergeGroupCount = boxIndexes.count + earlierBoxesIndexes.count + (earlierBoxesIndexes.last! - boxIndexes.first!)
+                        
+                        if checkFromIndex < size-1, stillPossibleMergeGroupCount < number.value {
+                            boxes[checkFromIndex...].forEach { box in
+                                if box.state == .unknown {
+                                    debug("ruleMultipleNumbers - set box \(box.pos) empty", doPrint: print)
+                                    box.state = .empty
+                                    changed = true
+                                }
+                            }
+                        }
                     }
                     
-                        
+                    
+                    
+                    
                     debug("ruleMultipleNumbers - boxGroups \(i) not same amount of numbers - check for emptys", doPrint: print)
                     
                     if i > 0 {
@@ -1409,7 +1497,7 @@ class Grid {
                             
                             let neededEmptys = number.value - boxIndexes.count
                             let currentFirstIndex = boxIndexes.first!
-                            let from = nextEmptyIndex+2
+                            let from = nextEmptyIndex+1
                             let to = currentFirstIndex-neededEmptys
                             debug("ruleMultipleNumbers - check \(from) to \(to)", doPrint: print)
                             if from <= to {
@@ -1442,6 +1530,7 @@ class Grid {
                         
                         if !number.fullfilled {
                             number.fullfilled = true
+                            number.fullfills = (firstFilled..<(firstFilled+number.value)).map { Int($0) }
                             changed = true
                         }
                     } else if boxes[lastFilled+1].state == .empty {
@@ -1455,6 +1544,7 @@ class Grid {
                         
                         if !number.fullfilled {
                             number.fullfilled = true
+                            number.fullfills = ((lastFilled-(number.value-1))..<lastFilled).map { Int($0) }
                             changed = true
                         }
                     } else {
@@ -1479,28 +1569,31 @@ class Grid {
                         }
                     }
                 }
-            } else {
+            }
+//            else {
                 let highestNumber = config.numbers.sorted(by: { $0.value > $1.value }).first!.value
-                
-                if !boxGroups.contains(where: { $0.count > highestNumber }) {
-                    
+                debug("Highest Number: \(highestNumber)", doPrint: print)
+
+                if boxGroups.contains(where: { $0.count == highestNumber }) {
+                    debug("Groups contains highest number", doPrint: print)
                     for boxGroup in boxGroups.filter({ $0.count == highestNumber }) {
-                        
+                        debug("boxGroup equals highest number: \(boxGroup)", doPrint: print)
                         var tmpIndex = -1
                         var valid = true
                         for index in boxGroup {
-                            
+                            debug("index: \(index) - tmpIndex: \(tmpIndex)", doPrint: print)
                             if tmpIndex == -1 {
                                 tmpIndex = index
-                            }
-                            
-                            if tmpIndex + 1 != index {
+                            } else if tmpIndex + 1 != index {
                                 valid = false
                                 break
+                            } else {
+                                tmpIndex += 1
                             }
                             
                         }
                         guard valid else {
+                            debug("Not valid", doPrint: print)
                             continue
                         }
                         debug("ruleMultipleNumbers - boxGroups with same amount of numbers \(boxGroup)", doPrint: print)
@@ -1512,114 +1605,471 @@ class Grid {
                             boxes[lastIndex+1].state = .empty
                         }
                         
+                        let nums = config.numbers.filter({ $0.value == highestNumber })
+                        var number = nums.first!
+                        if nums.count == 1, !number.fullfilled {
+                            number.fullfilled = true
+                            number.fullfills = boxGroup
+                            changed = true
+                            debug("number fullfilled: \(number.fullfills)", doPrint: print)
+                        }
+                        
                     }
                     
                 }
                 
-            }
+//            }
             
-            debug("ruleMultipleNumbers - check all gaps and fill them logical if possible", doPrint: print)
-            
-            var gapGroup = [[Int]]()
-            var j = 0
-            boxes.indices.forEach { index in
-                if boxes[index].state != .empty {
-                    if gapGroup.count == j {
-                        gapGroup.append([index])
-                    } else {
-                        gapGroup[j].append(index)
-                    }
-                } else if gapGroup.count > j {
-                    j += 1
-                }
-            }
-            
-            debug("ruleMultipleNumbers - gapGroups \(gapGroup)",  doPrint: print)
+//            debug("ruleMultipleNumbers - check all gaps and fill them logical if possible", doPrint: print)
+//            
+//            var gapGroup = [[Int]]()
+//            var j = 0
+//            boxes.indices.forEach { index in
+//                if boxes[index].state != .empty {
+//                    if gapGroup.count == j {
+//                        gapGroup.append([index])
+//                    } else {
+//                        gapGroup[j].append(index)
+//                    }
+//                } else if gapGroup.count > j {
+//                    j += 1
+//                }
+//            }
+//            
+//            debug("ruleMultipleNumbers - gapGroups \(gapGroup)",  doPrint: print)
             
             // check for same amount of gapGroups than numbers
             // -> check non fullfilled number with gapGroup
             // -> fill if possible, border check, etc ... again? Just fillMiddle?
-            if gapGroup.count == config.numbers.count {
-                debug("ruleMultipleNumbers - gapGroups same amount as numbers",  doPrint: print)
-                
-                for j in 0..<gapGroup.count {
-                    
-                    let boxIndexes = gapGroup[j]
-                    let number = config.numbers[j]
-                    
-                    if number.fullfilled {
-                        debug("ruleMultipleNumbers - number fullfiled, for sake set all if needed", doPrint: print)
-                        boxes[boxIndexes.first!...boxIndexes.last!].filter({$0.state == .unknown}).forEach { box in
-                            box.state = .empty
-                            changed = true
-                        }
-                        
-                    } else {
-                        
-                        let firstBox = boxIndexes.first!
-                        let lastBox = boxIndexes.last!
-                        // check border
-                        if boxes[firstBox].state == .filled {
-                            debug("ruleMultipleNumbers - filled hits first border, fill rest. fromPos \(firstIndex+1) toPos \(firstBox+1+(number.value-1))", doPrint: print)
-                            boxes[firstBox..<(firstBox+(number.value-1))].forEach { box in
-                                if box.state == .unknown {
-                                    box.state = .filled
-                                    changed = true
-                                }
-                            }
-                            if !number.fullfilled {
-                                number.fullfilled = true
-                                changed = true
-                            }
-                        } else if boxes[lastBox].state == .filled {
-                            debug("ruleMultipleNumbers - filled hits last border, fill rest. fromPos \((lastIndex+1)-(number.value-1)) toPos \(lastIndex+1)", doPrint: print)
-
-                            boxes[(lastBox-(number.value-1))..<lastBox].forEach { box in
-                                if box.state == .unknown {
-                                    box.state = .filled
-                                    changed = true
-                                }
-                            }
-                            if !number.fullfilled {
-                                number.fullfilled = true
-                                changed = true
-                            }
-                        } else {
-                            debug("ruleMultipleNumbers - filled hits no border, check middles", doPrint: print)
-                           
-//                            let didChange = ruleFillMiddles(
-//                                number: number,
-//                                from: firstBox,
-//                                to: lastBox,
-//                                boxes: boxes,
-//                                doPrint: print
-//                            )
-//                            if didChange {
+//            if gapGroup.count == config.numbers.count {
+//                debug("ruleMultipleNumbers - gapGroups same amount as numbers",  doPrint: print)
+//                
+//                for j in 0..<gapGroup.count {
+//                    
+//                    let boxIndexes = gapGroup[j]
+//                    let number = config.numbers[j]
+//                    
+//                    if number.fullfilled {
+//                        debug("ruleMultipleNumbers - number fullfiled, for sake set all if needed", doPrint: print)
+//                        boxes[boxIndexes.first!...boxIndexes.last!].filter({$0.state == .unknown}).forEach { box in
+//                            box.state = .empty
+//                            changed = true
+//                        }
+//                        
+//                    } else {
+//                        
+//                        let firstBox = boxIndexes.first!
+//                        let lastBox = boxIndexes.last!
+//                        // check border
+//                        if boxes[firstBox].state == .filled {
+//                            debug("ruleMultipleNumbers - filled hits first border, fill rest. fromPos \(firstIndex+1) toPos \(firstBox+1+(number.value-1))", doPrint: print)
+//                            boxes[firstBox..<(firstBox+(number.value-1))].forEach { box in
+//                                if box.state == .unknown {
+//                                    box.state = .filled
+//                                    changed = true
+//                                }
+//                            }
+//                            if !number.fullfilled {
+//                                number.fullfilled = true
 //                                changed = true
 //                            }
-                            
+//                        } else if boxes[lastBox].state == .filled {
+//                            debug("ruleMultipleNumbers - filled hits last border, fill rest. fromPos \((lastIndex+1)-(number.value-1)) toPos \(lastIndex+1)", doPrint: print)
+//                            
+//                            boxes[(lastBox-(number.value-1))..<lastBox].forEach { box in
+//                                if box.state == .unknown {
+//                                    box.state = .filled
+//                                    changed = true
+//                                }
+//                            }
+//                            if !number.fullfilled {
+//                                number.fullfilled = true
+//                                changed = true
+//                            }
+//                        } else {
+//                            debug("ruleMultipleNumbers - filled hits no border, check middles", doPrint: print)
+//                            
+//                            //                            let didChange = ruleFillMiddles(
+//                            //                                number: number,
+//                            //                                from: firstBox,
+//                            //                                to: lastBox,
+//                            //                                boxes: boxes,
+//                            //                                doPrint: print
+//                            //                            )
+//                            //                            if didChange {
+//                            //                                changed = true
+//                            //                            }
+//                            
+//                        }
+//                        
+//                    }
+//                    
+//                }
+//            } else {
+//                //                // MARK: i was here
+//                //                // should not only be here?
+//                //                debug("ruleMultipleNumbers - gapGroups not same amount as numbers - \(config.description)",  doPrint: print)
+//                //                for number in config.numbers {
+//                //                    debug("ruleMultipleNumbers - gap groups number")
+//                //                    debug("Number: \(number.value), Fullfilled: \(number.fullfilled)", doPrint: print)
+//                //                    debug("Fullfilled Boxes: \(number.fullfills)", doPrint: print)
+//                //
+//                //                }
+//            }
+//            
+            
+            // if not same amount, check for possible invalid gaps
+            // -> some numbers already  used in gaps, -> rest of numbers to high
+            
+            // MARK: - when nothing changed. Check the fullfilled ones
+            if config.numbers.contains(where: { $0.fullfilled }), !config.fullfilled {
+                if print {
+                    printBoard()
+                }
+                // MARK: i was here
+                // should not only be here?
+                var print = true
+                debug("ruleMultipleNumbers - notChanged? check stuff besides fullfilled - \(config.description)",  doPrint: print)
+                for index in config.numbers.indices {
+                    var number = config.numbers[index]
+                    debug("ruleMultipleNumbers - NumberIndex: \(index)", doPrint: print)
+                    debug("Number: \(number.value), Fullfilled: \(number.fullfilled)", doPrint: print)
+                    debug("Fullfilled Boxes: \(number.fullfills)", doPrint: print)
+                    
+                    if number.fullfilled {
+                        
+                        guard number.fullfills.count > 0 else {
+                            debug("ruleMultipleNumbers - number fullfilled but no correct box identifiable", doPrint: print)
+                            continue
                         }
                         
+                        debug("ruleMultipleNumbers - check next numbers", doPrint: print)
+                        // run new middle for numbers before and after
+                        if index > 0 {
+                            
+                            debug("ruleMultipleNumbers - check numbers from right to left", doPrint: print)
+                            // wich numbers are before?
+                            // are they fullfilled?
+                            // what is the range?
+                            
+                            
+                            /*
+                             were not the first number
+                             go direction left in numbers
+                             set first fullfiled box - 2 as to value (unknown - n...empty - filled ....)
+                             lopp every number before, index = 2? nextindex = 1 ....
+                                if fullfilled - adjust boxes range?
+                                    to = newIndexes fullfilled - 2
+                                if not
+                                    set from rang from "to" - number value ?
+                                if next is fullfilled again
+                                    runFillMiddle for one number that was not filled.
+                                    from will be currentNumber box last index + 2
+                             
+                                if newIndex == 0
+                                    check if needs to set border as to value
+                             */
+                            
+                            var from = 0
+                            guard var to = boxes[0..<number.fullfills.first!].lastIndex(where: { $0.state != .empty }) else {
+                                debug("all done before fullfiled number?", doPrint: print)
+                                continue
+                            }
+                            
+                            debug("toPos: \(to+1), fromPos: \(from+1)", doPrint: print)
+                            var foundUnfullfilledNumbers: [Number] = []
+                            for i in (0..<index).reversed() {
+                                var nextNumber = config.numbers[i]
+                                debug("Next Number: \(nextNumber.value)", doPrint: print)
+                                debug("Fullfilled Boxes: \(nextNumber.fullfills)", doPrint: print)
+                                /*
+                                if nextNumber.fullfilled {
+                                    if foundUnfullfilledNumbers.count == 1 {
+                                        debug("Fullfilled and the number between unfulfiled. Check middle", doPrint: print)
+                                        
+                                        if let newTo = boxes[from...nextNumber.fullfills.first!-2].lastIndex(where: { $0.state == .empty }) {
+                                            to = newTo
+                                        }
+                                        
+                                        var didChange = ruleFillMiddles(
+                                            number: foundUnfullfilledNumbers.removeFirst(),
+                                            from: from+1,
+                                            to: to,
+                                            boxes: boxes,
+                                            doPrint: print
+                                        )
+                                        if didChange {
+                                            changed = true
+                                        }
+                                        foundUnfullfilledNumbers = []
+                                        
+                                    } else if foundUnfullfilledNumbers.count > 1 {
+                                        debug("Fullfilled and there multiple numbers unfullfiled in between", doPrint: print)
+                                        let didChange = ruleFillMiddles(
+                                            forMultipleNumbers: foundUnfullfilledNumbers,
+                                            initialFrom: from,
+                                            initialTo: to,
+                                            boxes: boxes,
+                                            doPrint: print
+                                        )
+                                        
+                                        foundUnfullfilledNumbers = []
+                                    } else {
+                                        
+                                        debug("for sake fill the middles", doPrint: print)
+                                        boxes[number.fullfills.last!..<nextNumber.fullfills.first!].forEach { box in
+                                            if box.state == .unknown {
+                                                debug("box \(box.pos) - set empty", doPrint: print)
+                                                box.state = .empty
+                                                changed = true
+                                            }
+                                        }
+                                    }
+                                    debug("get next from - current fromPos: \(from+1)", doPrint: print)
+                                    
+                                    if let newFrom = boxes[(nextNumber.fullfills.last!+1)...].firstIndex(where: { $0.state != .empty }) {
+                                        from = newFrom
+                                        debug("toPos: \(to+1), fromPos: \(from+1)", doPrint: print)
+                                    }
+                                    
+                                } else {
+                                    debug("unfullfilled number ... add to stack", doPrint: print)
+                                    foundUnfullfilledNumbers.append(nextNumber)
+                                }
+                                 */
+                            }
+                            /*
+                            debug("foundUnfullfilledNumbers: \(foundUnfullfilledNumbers.count)", doPrint: print)
+                            if foundUnfullfilledNumbers.count == 1 {
+                                debug("Fullfilled and the number afterward is unfulfiled. Check middle", doPrint: print)
+                                
+                                to = boxes[from...].lastIndex(where: { $0.state == .empty }) ?? size
+                                
+                                var didChange = ruleFillMiddles(
+                                    number: foundUnfullfilledNumbers.removeFirst(),
+                                    from: from+1,
+                                    to: to,
+                                    boxes: boxes,
+                                    doPrint: print
+                                )
+                                if didChange {
+                                    changed = true
+                                }
+                                foundUnfullfilledNumbers = []
+                                break
+                            } else if foundUnfullfilledNumbers.count > 1 {
+                                debug("Fullfilled and there multiple numbers unfullfiled afterwards", doPrint: print)
+                                
+                                let didChange = ruleFillMiddles(
+                                    forMultipleNumbers: foundUnfullfilledNumbers,
+                                    initialFrom: from,
+                                    initialTo: to,
+                                    boxes: boxes,
+                                    doPrint: print
+                                )
+                                
+                                debug("Fullfilled and there multiple numbers unfullfiled afterwards - didChange: \(didChange)", doPrint: print)
+                                
+                                if didChange {
+                                    changed = true
+                                }
+                                
+                                foundUnfullfilledNumbers = []
+                                break
+                            }
+                             */
+                        }
+                        
+                        if index < config.numbers.count - 1 {
+                            debug("ruleMultipleNumbers - check numbers from left to right", doPrint: print)
+                            /*
+                             -were not the last number
+                             -go direction right in numbers
+                             -set to as most right
+                             -set first unknown after last fullfiled box as from, at least +2 (filled - n...empty - unknown)
+                             -lop every number after, index = 1, nextIndex = 2
+                                if number is fullfilled - adjust from range
+                                    from = nextIndex last box + 2 (filled - n...empty - unknown)
+                                if not
+                                    set from range to first next unknown
+                                if next Number is fullfilled again
+                                    set range acordingly and runFillMiddle. -> but proceed afterwards and reset from - to
+                                if nextIndex == last
+                                    check to set
+                             */
+                            var to = size-1
+                            guard var from = boxes[(number.fullfills.last!+1)...].firstIndex(where: { $0.state != .empty }) else {
+                                debug("all done after fullfiled number?", doPrint: print)
+                                continue
+                            }
+                            debug("toPos: \(to+1), fromPos: \(from+1)", doPrint: print)
+                            var foundUnfullfilledNumbers: [Number] = []
+                            for i in (index+1)..<config.numbers.count {
+                                var nextNumber = config.numbers[i]
+                                debug("Next Number: \(nextNumber.value)", doPrint: print)
+                                debug("Fullfilled Boxes: \(nextNumber.fullfills)", doPrint: print)
+
+                                if nextNumber.fullfilled {
+                                    if foundUnfullfilledNumbers.count == 1 {
+                                        debug("Fullfilled and the number between unfulfiled. Check middle", doPrint: print)
+                                        
+                                        if let newTo = boxes[from...nextNumber.fullfills.first!-2].lastIndex(where: { $0.state == .empty }) {
+                                            to = newTo
+                                        }
+                                        
+                                        var didChange = ruleFillMiddles(
+                                            number: foundUnfullfilledNumbers.removeFirst(),
+                                            from: from+1,
+                                            to: to,
+                                            boxes: boxes,
+                                            doPrint: print
+                                        )
+                                        if didChange {
+                                            changed = true
+                                        }
+                                        foundUnfullfilledNumbers = []
+                                        
+                                    } else if foundUnfullfilledNumbers.count > 1 {
+                                        debug("Fullfilled and there multiple numbers unfullfiled in between", doPrint: print)
+                                        let didChange = ruleFillMiddles(
+                                            forMultipleNumbers: foundUnfullfilledNumbers,
+                                            initialFrom: from,
+                                            initialTo: to,
+                                            boxes: boxes,
+                                            doPrint: print
+                                        )
+                                        
+                                        foundUnfullfilledNumbers = []
+                                    } else {
+                                        
+                                        debug("for sake fill the middles", doPrint: print)
+                                        boxes[number.fullfills.last!..<nextNumber.fullfills.first!].forEach { box in
+                                            if box.state == .unknown {
+                                                debug("box \(box.pos) - set empty", doPrint: print)
+                                                box.state = .empty
+                                                changed = true
+                                            }
+                                        }
+                                    }
+                                    debug("get next from - current fromPos: \(from+1)", doPrint: print)
+                                    
+                                    if let newFrom = boxes[(nextNumber.fullfills.last!+1)...].firstIndex(where: { $0.state != .empty }) {
+                                        from = newFrom
+                                        debug("toPos: \(to+1), fromPos: \(from+1)", doPrint: print)
+                                    }
+                                    
+                                } else {
+                                    debug("unfullfilled number ... add to stack", doPrint: print)
+                                    foundUnfullfilledNumbers.append(nextNumber)
+                                }
+                            }
+                            
+                            debug("foundUnfullfilledNumbers: \(foundUnfullfilledNumbers.count)", doPrint: print)
+                            if foundUnfullfilledNumbers.count == 1 {
+                                debug("Fullfilled and the number afterward is unfulfiled. Check middle", doPrint: print)
+                                
+                                to = boxes[from...].lastIndex(where: { $0.state == .empty }) ?? size
+                                
+                                var didChange = ruleFillMiddles(
+                                    number: foundUnfullfilledNumbers.removeFirst(),
+                                    from: from+1,
+                                    to: to,
+                                    boxes: boxes,
+                                    doPrint: print
+                                )
+                                if didChange {
+                                    changed = true
+                                }
+                                foundUnfullfilledNumbers = []
+                                break
+                            } else if foundUnfullfilledNumbers.count > 1 {
+                                debug("Fullfilled and there multiple numbers unfullfiled afterwards", doPrint: print)
+                                
+                                let didChange = ruleFillMiddles(
+                                    forMultipleNumbers: foundUnfullfilledNumbers,
+                                    initialFrom: from,
+                                    initialTo: to,
+                                    boxes: boxes,
+                                    doPrint: print
+                                )
+                                
+                                debug("Fullfilled and there multiple numbers unfullfiled afterwards - didChange: \(didChange)", doPrint: print)
+                                
+                                if didChange {
+                                    changed = true
+                                }
+                                
+                                foundUnfullfilledNumbers = []
+                                break
+                            }
+                        }
+                             
                     }
                     
                 }
             }
             
-            
-            // if not same amount, check for possible invalid gaps
-            // -> some numbers already  used in gaps, -> rest of numbers to high
-            
-            
         } else {
-            debug("ruleMultipleNumbers - no filled boxes")
+            debug("ruleMultipleNumbers - no filled boxes", doPrint: print)
         }
         
         
+        debug("ruleMultipleNumbers -  finished - changed: \(changed)", doPrint: print)
+        return changed
+    }
+    
+    private func ruleFillMiddles(forMultipleNumbers numbers: [Number], initialFrom: Int, initialTo: Int, boxes: [Box], doPrint: Bool = false)  -> Bool {
+        debug("ruleFillMiddles(forMultiplenumbers", doPrint: doPrint)
+        let countOfNumbers = numbers.count
+        var changed = false
+        // MARK: -- middles for all numbers
+        for i in 0..<countOfNumbers {
+            debug("ruleFillMiddles(forMultiplenumbers - checkNumber: \(i)", doPrint: doPrint)
+            // search for middles?
+            var number = numbers[i]
+            debug("ruleFillMiddles(forMultiplenumbers - checkNumber: \(i) value: \(number.value) fullfilled: \(number.fullfilled)", doPrint: doPrint)
+            
+            guard !number.fullfilled else {
+                continue
+            }
+                        
+            var from = initialFrom + 1
+            if i > 0 {
+                // add unfree space from numbers befor index
+                for j in 0..<i {
+                    from += 1
+                    from += numbers[j].value
+                }
+            }
+            
+            var to = initialTo+1
+            if i+1 < countOfNumbers {
+                // add unfree space from numbers after index
+                for j in i+1..<countOfNumbers {
+                    to -= 1
+                    to -= numbers[j].value
+                }
+            }
+            
+            debug("ruleFillMiddles(forMultiplenumbers - from: \(from), to: \(to)", doPrint: doPrint)
+            
+            let didChange = ruleFillMiddles(
+                number: number,
+                from: from,
+                to: to,
+                boxes: boxes,
+                doPrint: doPrint
+            )
+            
+            if didChange {
+                changed = true
+            }
+        }
         
         return changed
     }
     
-    private func ruleCheckDone(config: Config, boxes: [Box]) -> Bool {
+    private func ruleCheckDone(config: Config, boxes: [Box], size: Int) -> Bool {
         var print = false // config.pos == (x: 4, y: 0)
         
         debug("ruleCheckDone - config \(config.description)", doPrint: print)
@@ -1634,17 +2084,108 @@ class Grid {
             }
             config.numbers.forEach { $0.fullfilled = true }
             changed = true
-        }
-        
-        if boxes.filter({ $0.state != .empty }).count == config.numbersSize {
-            debug("ruleCheckDone - all filled -> fill emptys", doPrint: print)
-            for box in boxes.filter({$0.state == .unknown}) {
-                box.state = .filled
+        } else {
+            
+            if boxes.filter({ $0.state != .empty }).count == config.numbersSize {
+                debug("ruleCheckDone - all filled -> fill emptys", doPrint: print)
+                for box in boxes.filter({$0.state == .unknown}) {
+                    box.state = .filled
+                }
+                config.numbers.forEach { $0.fullfilled = true }
+                changed = true
             }
-            config.numbers.forEach { $0.fullfilled = true }
-            changed = true
         }
         
+        if !changed {
+            printBoard()
+            debug("ruleCheckDone - check for done numbers for sure", doPrint: print)
+            debug("ruleCheckDone - from left to right", doPrint: print)
+            
+            var tmpIndexes: [Int] = []
+            var currentNumberIndex = 0
+            for index in boxes.indices {
+                var box = boxes[index]
+                guard box.state != .unknown else {
+                    break
+                }
+                
+                if box.state == .filled {
+                    tmpIndexes.append(index)
+                }
+                if box.state == .empty {
+                    if tmpIndexes.count > 0 {
+                        var number = config.numbers[currentNumberIndex]
+                        if number.value == tmpIndexes.count {
+                            number.fullfilled = true
+                            number.fullfills = tmpIndexes
+                            currentNumberIndex += 1
+                            debug("ruleCheckDone - fullfilled number: \(number.value) - boxes: \(number.fullfills) ", doPrint: print)
+                        } else {
+                            break
+                        }
+                    }
+                    
+                    tmpIndexes = []
+                }
+                
+            }
+            
+            debug("ruleCheckDone - from right to left", doPrint: print)
+            currentNumberIndex = config.numbers.count-1
+            tmpIndexes = []
+            for index in boxes.indices.reversed() {
+                var box = boxes[index]
+                guard box.state != .unknown else {
+                    break
+                }
+                
+                if box.state == .filled {
+                    tmpIndexes.append(index)
+                }
+                if box.state == .empty {
+                    if tmpIndexes.count > 0 {
+                        var number = config.numbers[currentNumberIndex]
+                        if number.value == tmpIndexes.count {
+                            number.fullfilled = true
+                            number.fullfills = tmpIndexes.reversed()
+                            currentNumberIndex -= 1
+                            debug("ruleCheckDone - fullfilled number: \(number.value) - boxes: \(number.fullfills) ", doPrint: print)
+
+                        } else {
+                            break
+                        }
+                    }
+                    
+                    tmpIndexes = []
+                }
+                
+            }
+           
+            
+        }
+        
+        if changed {
+            var boxIndex = boxes.firstIndex(where: { $0.state == .filled })!
+            debug("ruleCheckDone - changed - firstBoxIndex \(boxIndex)", doPrint: print)
+            config.numbers.forEach { number in
+                
+                number.fullfills = (boxIndex..<(boxIndex+number.value)).map { Int($0) }
+                debug("ruleCheckDone - changed - number: \(number.value) - fullfilles: \(number.fullfills)", doPrint: print)
+                let nextStart = (number.fullfills.last!+1)
+                if nextStart < size - 1 {
+                    
+                    if let newIndex = boxes[nextStart...].firstIndex(where: { $0.state == .filled }) {
+                        boxIndex = newIndex
+                        debug("ruleCheckDone - changed - newBoxIndex \(boxIndex)", doPrint: print)
+                    } else {
+                        debug("ruleCheckDone - changed - no new box", doPrint: print)
+                    }
+                }
+                
+            }
+        }
+        
+        debug("ruleCheckDone - didChange: \(changed)", doPrint: print)
         return changed
     }
    
@@ -1693,7 +2234,7 @@ class Grid {
                     continue
                 }
                 
-                guard !ruleCheckDone(config: config, boxes: configBoxes) else {
+                guard !ruleCheckDone(config: config, boxes: configBoxes, size: sizeForRule) else {
                     debug("ruleCheckDone -> changed and continue", doPrint: print)
                     changed = true
                     continue

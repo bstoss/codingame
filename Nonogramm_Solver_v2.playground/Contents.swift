@@ -339,15 +339,15 @@ var expectedOutputDolphin = [
 //var input = inputDog
 //var exepcted = expectedOutputDog
 
-var input = inputMusic
-var exepcted = expectedOutputMusic
+//var input = inputMusic
+//var exepcted = expectedOutputMusic
 
 //var input = inputAfrica
 //var exepcted = expectedOutputAfrica
-////
-//var input = inputCat
-//var exepcted = expectedOutputCat
-////
+//////
+var input = inputCat
+var exepcted = expectedOutputCat
+//
 //var input = inputDolphin
 //var exepcted = expectedOutputDolphin
 
@@ -630,73 +630,155 @@ var yPatterns: Pattern = [:]
 
 for config in configs {
     if config.pos.x == 0 {
-        let length = height
+        let length = width
         xPatterns[config] = generatePatterns(length: length, blocks: config.clues)
+        debug("xConf: \(config.description) - Combinations: \(xPatterns[config]!.count)", doPrint: true)
     }
     if config.pos.y == 0 {
-        let length = width
+        let length = height
         yPatterns[config] = generatePatterns(length: length, blocks: config.clues)
+        debug("yConf: \(config.description) - Combinations: \(yPatterns[config]!.count)", doPrint: true)
     }
 }
 
-func checkToRemove(forOnlyComb theComb: [Int], positon: Int, config: Config, combs: [[Int]]) -> [[Int]] {
+func checkToRemove(forOnlyComb theComb: [Int], positon: Int, config: Config, combs: [[Int]], print: Bool = false) -> [[Int]] {
     let combCount = combs.count
-    debug("Pattern: \(config.description) - Combinations: \(combCount)")
+    debug("Check to remove Pattern: \(config.description) - Combinations: \(combCount)", doPrint: print)
     let thisPosition = config.pos.x == 0 ? config.pos.y : config.pos.x
+    debug("PosOfCombPattern: \(thisPosition)", doPrint: print)
     
     var combToRemove: [[Int]] = []
     for index in combs.indices {
         let comb = combs[index]
-        debug("\(comb)")
+        debug("   Comb \(comb) - pos: \(positon-1)", doPrint: print)
+        debug("TheComb \(theComb) - pos: \(thisPosition-1)", doPrint: print)
         if comb[positon-1] != theComb[thisPosition-1] {
-            debug("remove")
+            debug("remove", doPrint: print)
             combToRemove.append(comb)
         }
     }
     return combToRemove
 }
 
+
 var changed = false
 var doPrint = true
+
 repeat {
     changed = false
+    debug("######################", doPrint: doPrint)
     debug("x Patterns check for reduce", doPrint: doPrint)
     for pattern in xPatterns {
+        debug("\n## X ###\n", doPrint: doPrint)
         let combCount = pattern.value.count
         debug("\(pattern.key.description) - Combinations: \(combCount)", doPrint: doPrint)
+        debug("\(pattern.value)", doPrint: doPrint)
         
-        if combCount == 1 {
-            debug("Only 1 pattern. Remove all in yPatterns where not match", doPrint: doPrint)
-            let theComb = pattern.value.first!
+        // TODO: check if overlapping filled in this pattern.
+        // find the positon and only match against pos in other patteern
+        
+        var sumOfCombs: [Int] = Array(repeating: 0, count: width)
+        pattern.value.forEach { comb in
+            comb.indices.forEach { index in
+                sumOfCombs[index] += comb[index]
+            }
+        }
+        
+        var safeIndexes: [Int] = []
+        for index in sumOfCombs.indices {
+            let sum = sumOfCombs[index]
+            if sum == combCount || sum == 0 {
+                safeIndexes.append(index)
+            }
+        }
+        
+        debug("SumOfComb: \(sumOfCombs)", doPrint: doPrint)
+        debug("safeIndexes: \(safeIndexes)", doPrint: doPrint)
+        if safeIndexes.count > 0 {
+            
             let y = pattern.key.pos.y
             
             for yPattern in yPatterns {
-                let combToRemove = checkToRemove(forOnlyComb: theComb, positon: y, config: yPattern.key, combs: yPattern.value)
+
+                debug("yPattern: \(yPattern.key.description)", doPrint: doPrint)
+                guard safeIndexes.contains(yPattern.key.pos.x-1) else {
+                    debug("Don't check", doPrint: doPrint)
+                    continue
+                }
+                guard let theComb = pattern.value.first else {
+                    fatalError("theComb not found anymore. \(pattern.key.description)")
+                }
+                let combToRemove = checkToRemove(
+                    forOnlyComb: theComb,
+                    positon: y,
+                    config: yPattern.key,
+                    combs: yPattern.value,
+                    print: doPrint
+                )
                 if combToRemove.count > 0 {
                     changed = true
                 }
                 yPatterns[yPattern.key]?.removeAll { comb in
                     combToRemove.contains(comb)
                 }
+                debug("yPattern afterwards Combinations: \(yPatterns[yPattern.key]!.count)", doPrint: doPrint)
                 
             }
-            
         }
-        
     }
     
+    debug("######################", doPrint: doPrint)
     debug("y Patterns check for reduce", doPrint: doPrint)
     for pattern in yPatterns {
+        debug("\n## Y ###\n", doPrint: doPrint)
         let combCount = pattern.value.count
         debug("\(pattern.key.description) - Combinations: \(combCount)", doPrint: doPrint)
-        if combCount == 1 {
-            debug("Only 1 pattern. Remove all in yPatterns where not match", doPrint: doPrint)
-            let theComb = pattern.value.first!
-            debug("\(theComb)", doPrint: doPrint)
+        
+        debug("\(pattern.value)", doPrint: doPrint)
+        
+        // TODO: check if overlapping filled in this pattern.
+        // find the positon and only match against pos in other patteern
+        
+        var sumOfCombs: [Int] = Array(repeating: 0, count: height)
+        pattern.value.forEach { comb in
+            comb.indices.forEach { index in
+                sumOfCombs[index] += comb[index]
+            }
+        }
+        
+        var safeIndexes: [Int] = []
+        for index in sumOfCombs.indices {
+            let sum = sumOfCombs[index]
+            if sum == combCount || sum == 0 {
+                safeIndexes.append(index)
+            }
+        }
+        debug("SumOfComb: \(sumOfCombs)", doPrint: doPrint)
+        debug("safeIndexes: \(safeIndexes)", doPrint: doPrint)
+        
+        if safeIndexes.count > 0 {
+            
+            
             let x = pattern.key.pos.x
             
             for xPattern in xPatterns {
-                let combToRemove = checkToRemove(forOnlyComb: theComb, positon: x, config: xPattern.key, combs: xPattern.value)
+
+                debug("xPattern: \(xPattern.key.description)", doPrint: doPrint)
+                guard safeIndexes.contains(xPattern.key.pos.y-1) else {
+                    debug("Don't check", doPrint: doPrint)
+                    continue
+                }
+                guard let theComb = pattern.value.first else {
+                    fatalError("theComb not found anymore. \(pattern.key.description)")
+                }
+
+                let combToRemove = checkToRemove(
+                    forOnlyComb: theComb,
+                    positon: x,
+                    config: xPattern.key,
+                    combs: xPattern.value,
+                    print: doPrint
+                )
                 if combToRemove.count > 0 {
                     changed = true
                 }
@@ -709,7 +791,7 @@ repeat {
     }
 } while (changed)
 
-let printOutput = false
+let printOutput = true
 for pattern in xPatterns.sorted(by: { lhs, rhs in lhs.key.pos.y < rhs.key.pos.y }) {
     for comb in pattern.value {
         debug(renderPattern(comb), doPrint: printOutput)
@@ -722,7 +804,11 @@ for pattern in yPatterns.sorted(by: { lhs, rhs in lhs.key.pos.x < rhs.key.pos.x 
     var output = ""
     debug(pattern.key.description, doPrint: printOutput)
     debug("\(pattern.value)", doPrint: printOutput)
-    for value in pattern.value.first! {
+    
+    guard let comb = pattern.value.first else {
+        fatalError("comb not found anymore. \(pattern.key.description)")
+    }
+    for value in comb {
         if value == 0 {
             tmpCount += 1
         } else if tmpCount > 0 {
@@ -773,21 +859,6 @@ for pattern in xPatterns.sorted(by: { lhs, rhs in lhs.key.pos.y < rhs.key.pos.y 
     outputLines.append(output)
 }
 
-/*
- var expectedOutputDog = [
-     "1 3",
-     "2",
-     "1 2",
-     "0",
-     "1 3",
-     "3 1",
-     "1",
-     "1 1",
-     "1 1 1",
-     "1 1 1"
- ]
- */
-
 outputLines.forEach {
     print($0)
 }
@@ -795,9 +866,3 @@ outputLines.forEach {
 // END
 
 print(exepcted == outputLines)
-
-//print("Number of patterns:", patterns.count)
-//print("First 5 patterns:")
-//for i in 0..<min(5, patterns.count) {
-//    print(renderPattern(patterns[i]))
-//}

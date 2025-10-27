@@ -74,6 +74,7 @@ struct Hurdles {
     }
     let track: [Field]
     var playersPositions: [Int] = Array(repeating: 0, count: 3)
+    var playerStuns: [Int] = Array(repeating: 0, count: 3)
     
     init?(register: String) {
         let inputs = register.split(separator: " ").map(String.init)
@@ -88,10 +89,9 @@ struct Hurdles {
         playersPositions[1] = Int(inputs[2])!
         playersPositions[2] = Int(inputs[3])!
         
-        // stun - not needed
-//        let reg3 = Int(inputs[4])!
-//        let reg4 = Int(inputs[5])!
-//        let reg5 = Int(inputs[6])!
+        playerStuns[0] = Int(inputs[4])!
+        playerStuns[1] = Int(inputs[5])!
+        playerStuns[2] = Int(inputs[6])!
         
         // unused
 //        let reg6 = Int(inputs[7])!
@@ -99,8 +99,11 @@ struct Hurdles {
     
     
     
-    func bestMove(forPlayer player: Int) -> Output {
+    func bestMove(forPlayer player: Int) -> Output? {
         
+        guard playerStuns[player] == 0 else {
+            return nil
+        }
         /*
          
          P...#....#...#....#....#...... 0 0 0 0 0 0 -> RIGHT (3)
@@ -141,15 +144,23 @@ repeat {
         )*/
     }
     
-    var output: Output = .LEFT
+    var outputs: [Output: Int] = [
+        .LEFT: 0,
+        .RIGHT: 0,
+        .UP: 0,
+        .DOWN: 0
+    ]
     if numberOfGames > 0 {
         for i in 0..<numberOfGames {
             if let hurdlesGame = Hurdles(register: readPrint()) {
-                output = hurdlesGame.bestMove(forPlayer: myPlayerId)
+                if let move = hurdlesGame.bestMove(forPlayer: myPlayerId) {
+                    outputs[move]! += 1
+                }
             }
         }
     }
-    
-    print(output)
+        
+    let most = outputs.sorted { $0.value > $1.value }.first!
+    print(most.key)
 
 } while (loop)
